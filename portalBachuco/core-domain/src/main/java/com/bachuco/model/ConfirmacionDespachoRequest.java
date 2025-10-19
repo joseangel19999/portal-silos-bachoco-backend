@@ -2,7 +2,7 @@ package com.bachuco.model;
 
 public class ConfirmacionDespachoRequest {
 
-	private Integer bodegaId;
+	private String claveBodega;
 	private String claveSilo;
 	private String claveMaterial;
 	private String fechaEmbarque;
@@ -13,19 +13,21 @@ public class ConfirmacionDespachoRequest {
 	private String chofer;
 	private String placaJaula;
 	private String lineaTransportista;
-	private Integer destinoId;
-	private Integer numPedidoTraslado;
+	private String claveDestino;
+	private String numPedidoTraslado;
 	private String tipoMovimiento;
+	private Integer idconfDespacho;
+	private Integer idPedTraslado;
 	
 	public ConfirmacionDespachoRequest() {
 	}
 
-	public Integer getBodegaId() {
-		return bodegaId;
+	public String getClaveBodega() {
+		return claveBodega;
 	}
 
-	public void setBodegaId(Integer bodegaId) {
-		this.bodegaId = bodegaId;
+	public void setClaveBodega(String claveBodega) {
+		this.claveBodega = claveBodega;
 	}
 
 	public String getClaveSilo() {
@@ -108,19 +110,19 @@ public class ConfirmacionDespachoRequest {
 		this.lineaTransportista = lineaTransportista;
 	}
 
-	public Integer getDestinoId() {
-		return destinoId;
+	public String getClaveDestino() {
+		return claveDestino;
 	}
 
-	public void setDestinoId(Integer destinoId) {
-		this.destinoId = destinoId;
+	public void setClaveDestino(String claveDestino) {
+		this.claveDestino = claveDestino;
 	}
 
-	public Integer getNumPedidoTraslado() {
+	public String getNumPedidoTraslado() {
 		return numPedidoTraslado;
 	}
 
-	public void setNumPedidoTraslado(Integer numPedidoTraslado) {
+	public void setNumPedidoTraslado(String numPedidoTraslado) {
 		this.numPedidoTraslado = numPedidoTraslado;
 	}
 
@@ -132,4 +134,19 @@ public class ConfirmacionDespachoRequest {
 		this.tipoMovimiento = tipoMovimiento;
 	}
 
+	public Integer getIdconfDespacho() {
+		return idconfDespacho;
+	}
+
+	public void setIdconfDespacho(Integer idconfDespacho) {
+		this.idconfDespacho = idconfDespacho;
+	}
+
+	public Integer getIdPedTraslado() {
+		return idPedTraslado;
+	}
+
+	public void setIdPedTraslado(Integer idPedTraslado) {
+		this.idPedTraslado = idPedTraslado;
+	}
 }

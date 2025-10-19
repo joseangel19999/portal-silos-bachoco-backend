@@ -14,4 +14,5 @@ public interface SiloJpaRepository extends JpaRepository<SiloEntity,Integer> {
 	
 	 @Query("SELECT s.stock FROM silo s WHERE s.id = :id")
 	 Optional<Float> findStockById(@Param("id") Integer id);
+	 Optional<SiloEntity> findBySilo(String claveSilo);
 }

@@ -1,12 +1,17 @@
 package com.bachuco.service.usecase;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.bachuco.exception.PersistenceException;
+import com.bachuco.exception.RegistroNoCreadoException;
 import com.bachuco.exception.UsuarioDuplicadoException;
 import com.bachuco.model.Empleado;
+import com.bachuco.model.EmpleadoExternoRequest;
 import com.bachuco.model.EmpleadoInterno;
-import com.bachuco.model.Usuario;
+import com.bachuco.model.EmpleadoInternoRequest;
+import com.bachuco.model.EmpleadoInternoResponse;
+import com.bachuco.model.EmpleadoResponse;
 import com.bachuco.port.EmpleadoInternoRepositoryPort;
 import com.bachuco.port.EmpleadoRepositoryPort;
 import com.bachuco.port.PerfilRepositoryPort;
@@ -38,6 +43,9 @@ public class EmpleadoUseCase {
 		return emp;
 	}
 
+	public void update(Integer id,EmpleadoInternoRequest req) {
+		this.empleadoInternoRepositoryPort.update(id, req);
+	}
 	public EmpleadoInterno asignarDepartamentoConPuestoInterno(Integer empleadoId, Integer departamentoId,
 			Integer puestoId) {
 		// Departamento
@@ -59,5 +67,31 @@ public class EmpleadoUseCase {
 	
 	public List<EmpleadoInterno> findAll(){
 		return this.empleadoRepositoryPort.findAll();
+	}
+	
+	public List<EmpleadoInternoResponse> findAllEmpleadoResponse(){
+		return this.empleadoInternoRepositoryPort.findAll();
+	}
+	
+	public void saveEmpleadoInterno(EmpleadoInternoRequest req) {
+		var resultEmpelado = this.empleadoRepositoryPort.findByCorreo(req.getCorreo());
+		if (resultEmpelado.isPresent() && resultEmpelado.get().getId() != null) {
+			throw new UsuarioDuplicadoException("El correo ya existe");
+		}
+		try {
+			this.empleadoInternoRepositoryPort.save(req);
+		}catch (Exception e) {
+			e.printStackTrace();
+			throw new RegistroNoCreadoException("Hubo error al crear el registro");
+		}
+
+	}
+	
+	public Optional<EmpleadoResponse> findByUsuarioOrCorreo(String value){
+		return this.empleadoRepositoryPort.findByClaveUsuarioOrCorreo(value);
+	}
+	
+	public void delete(Integer id) {
+		this.empleadoInternoRepositoryPort.delete(id);
 	}
 }

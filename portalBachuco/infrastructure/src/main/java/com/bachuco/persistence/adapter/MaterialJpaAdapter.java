@@ -23,12 +23,17 @@ public class MaterialJpaAdapter implements MaterialRepositoryPort {
 	@Override
 	public void save(Material material) {
 		this.materialRepository.save(MaterialMapper.toEntity(material));
-		
 	}
 
 	@Override
 	public void update(Material material) {
-		this.materialRepository.save(MaterialMapper.toEntity(material));
+		Optional<MaterialEntity> opt=this.materialRepository.findByMaterialId(material.getMaterialId());
+		if(opt.isPresent()) {
+			MaterialEntity update=opt.get();
+			update.setDescripcion(material.getDescripcion());
+			update.setNumero(material.getNumero());
+			this.materialRepository.save(update);
+		}
 	}
 
 	@Override

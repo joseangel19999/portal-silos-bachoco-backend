@@ -51,6 +51,14 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 	
+	@ExceptionHandler(RegistroNoCreadoException.class)
+	public ResponseEntity<ApiError> handleException(RegistroNoCreadoException io,
+			HttpServletRequest request){
+		ApiError error = new ApiError(HttpStatus.NOT_FOUND.value(), "error-code:EX-001", io.getMessage(),
+				request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
+	
 	@ExceptionHandler(AuthenticationException.class)
 	public ResponseEntity<ApiError> handleAuthException(AuthenticationException ex,
 			HttpServletRequest request) {

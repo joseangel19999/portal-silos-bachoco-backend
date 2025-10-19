@@ -76,4 +76,9 @@ public class BodegaJpaRepositoryAdapter implements BodegaRepositoryPort{
 		return Optional.empty();
 	}
 
+	@Override
+	public List<Bodega> findBySilo(Integer siloId) {
+		return BodegaMapper.toDomain(this.bodegaRepository.findBySiloId(siloId));
+	}
+
 }

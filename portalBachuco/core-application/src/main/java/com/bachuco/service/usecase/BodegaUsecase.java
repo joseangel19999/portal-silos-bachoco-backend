@@ -55,6 +55,11 @@ public class BodegaUsecase {
 		return this.bodegaRepositoryPort.findAll();
 	}
 	
+	public List<Bodega> findBySilo(Integer siloId){
+		return this.bodegaRepositoryPort.findBySilo(siloId);
+	}
+	
+	
 	public void delete(Integer id) {
 		this.bodegaRepositoryPort.delete(id);
 	}

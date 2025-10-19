@@ -11,6 +11,7 @@ public interface SiloRepositoryPort {
 	Optional<Silo> update(Silo silo);
 	void delete(Integer id);
 	Optional<Silo> findById(Integer id);
+	Optional<Silo> findByClave(String clave);
 	List<Silo> findAll();
 	Optional<Float> stock(Integer siloId);
 

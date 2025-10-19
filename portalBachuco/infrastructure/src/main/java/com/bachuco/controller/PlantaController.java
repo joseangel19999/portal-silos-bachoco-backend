@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bachuco.dto.PlantaRequest;
 import com.bachuco.dto.PlantaResponse;
+import com.bachuco.mapper.SiloMapper;
+import com.bachuco.model.ApiResponse;
 import com.bachuco.model.Planta;
 import com.bachuco.service.usecase.PlantaUseCase;
 
@@ -30,17 +32,25 @@ public class PlantaController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<PlantaResponse> save(@RequestBody PlantaRequest request){
+	public ResponseEntity<ApiResponse<PlantaResponse>> save(@RequestBody PlantaRequest request){
+		ApiResponse<PlantaResponse> response=new ApiResponse<>();
 		Planta planta=new Planta();
 		planta.setPlanta(request.getPlanta());
 		planta.setNombre(request.getNombre());
 		planta.setSociedad(request.getSociedad());
-		Planta savePlanta=this.plantaUseCase.save(planta);
-		PlantaResponse response= PlantaResponse.builder()
-				.id(savePlanta.getId())
-				.nombre(savePlanta.getNombre())
-				.sociedad(savePlanta.getSociedad()).build();
-		return new ResponseEntity<PlantaResponse>(response,HttpStatus.CREATED);
+		ApiResponse<Planta> savePlanta=this.plantaUseCase.save(planta);
+		if(savePlanta.getCode().equals("0")) {
+			PlantaResponse result= PlantaResponse.builder()
+					.id(savePlanta.getData().getId())
+					.nombre(savePlanta.getData().getNombre())
+					.sociedad(savePlanta.getData().getSociedad()).build();
+			response.setCode("0");
+			response.setData(result);
+		}else {
+			response.setCode(savePlanta.getCode());
+			response.setMessage(savePlanta.getMessage());
+		}
+		return new ResponseEntity<ApiResponse<PlantaResponse>>(response,HttpStatus.CREATED);
 	}
 	
 	@PutMapping("/{id}")

@@ -1,13 +1,14 @@
 package com.bachuco.model.procedores;
 
 public class PedidoTrasladoDTO {
-	
+    
 	private Integer pedidoTrasladoId;
+	private String folioNumPosicion;
 	private String nombrePlantaDestino;
 	private String numPedidoTraslado;
 	private Float cantidadPedido;
 	private Float cantidadTraslado;
-	private Float cantidadRecibida;
+	private Float cantidadRecibidaPa;
 	private Float cantidadPendienteTraslado;
 	private String numCompraAsociado;
 	private Integer trasladosPendFact;
@@ -22,6 +23,14 @@ public class PedidoTrasladoDTO {
 
 	public void setPedidoTrasladoId(Integer pedidoTrasladoId) {
 		this.pedidoTrasladoId = pedidoTrasladoId;
+	}
+
+	public String getFolioNumPosicion() {
+		return folioNumPosicion;
+	}
+
+	public void setFolioNumPosicion(String folioNumPosicion) {
+		this.folioNumPosicion = folioNumPosicion;
 	}
 
 	public String getNombrePlantaDestino() {
@@ -56,12 +65,12 @@ public class PedidoTrasladoDTO {
 		this.cantidadTraslado = cantidadTraslado;
 	}
 
-	public Float getCantidadRecibida() {
-		return cantidadRecibida;
+	public Float getCantidadRecibidaPa() {
+		return cantidadRecibidaPa;
 	}
 
-	public void setCantidadRecibida(Float cantidadRecibida) {
-		this.cantidadRecibida = cantidadRecibida;
+	public void setCantidadRecibidaPa(Float cantidadRecibidaPa) {
+		this.cantidadRecibidaPa = cantidadRecibidaPa;
 	}
 
 	public Float getCantidadPendienteTraslado() {
@@ -95,6 +104,5 @@ public class PedidoTrasladoDTO {
 	public void setPosicion(String posicion) {
 		this.posicion = posicion;
 	}
-
 	
 }

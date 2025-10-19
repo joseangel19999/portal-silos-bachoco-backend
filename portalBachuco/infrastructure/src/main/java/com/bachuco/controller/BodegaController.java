@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bachuco.dto.BodegaRequestDto;
@@ -34,6 +35,13 @@ public class BodegaController {
 		List<Bodega> response=this.bodegaUsecase.findAll();
 		return new ResponseEntity<List<BodegaResponseDTO>>(BodegaMapper.toRequest(response),HttpStatus.OK);
 	}
+	
+	@GetMapping("/filter-silo")
+	public ResponseEntity<List<BodegaResponseDTO>> findBySilo(@RequestParam Integer siloId){
+		List<Bodega> response=this.bodegaUsecase.findBySilo(siloId);
+		return new ResponseEntity<List<BodegaResponseDTO>>(BodegaMapper.toRequest(response),HttpStatus.OK);
+	}
+	
 	
 	@PostMapping
 	public ResponseEntity<BodegaResponseDTO> save(@RequestBody BodegaRequestDto request){

@@ -16,7 +16,7 @@ public class ReporteDespachoRowMapper implements RowMapper<ReporteDespacho> {
 	@Override
 	public ReporteDespacho mapRow(ResultSet rs, int rowNum) throws SQLException {
 		ReporteDespacho despacho= new ReporteDespacho();
-		despacho.setId(rs.getInt("ARRIBO_ID"));
+		//despacho.setId(rs.getInt("ARRIBO_ID"));
 		LocalDateTime dateTime = rs.getTimestamp("FECHA_EMBARQUE").toLocalDateTime();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		

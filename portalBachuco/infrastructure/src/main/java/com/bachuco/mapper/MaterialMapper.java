@@ -2,7 +2,9 @@ package com.bachuco.mapper;
 import java.util.List;
 
 import com.bachuco.dto.MaterialResponseDTO;
+import com.bachuco.model.Categoria;
 import com.bachuco.model.Material;
+import com.bachuco.persistence.entity.CategoriaEntity;
 import com.bachuco.persistence.entity.MaterialEntity;
 
 public class MaterialMapper {
@@ -22,7 +24,14 @@ public class MaterialMapper {
 	public static MaterialEntity toEntity(Material material) {
 		return MaterialEntity.builder()
 				.numero(material.getNumero())
-				.descripcion(material.getDescripcion()).build();
+				.descripcion(material.getDescripcion())
+				.categoria(toEntityCategoria(material.getCategoria())).build();
+	}
+	
+	public static CategoriaEntity toEntityCategoria(Categoria cat) {
+		CategoriaEntity entity=new CategoriaEntity();
+		entity.setId(cat.getId());
+		return entity;
 	}
 	
 	public static List<Material> toDomain(List<MaterialEntity> entity) {

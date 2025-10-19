@@ -3,7 +3,9 @@ package com.bachuco.service.usecase;
 import java.util.List;
 import java.util.Optional;
 
+import com.bachuco.model.ApiResponse;
 import com.bachuco.model.Planta;
+import com.bachuco.model.Silo;
 import com.bachuco.port.PlantaRepositoryPort;
 
 public class PlantaUseCase {
@@ -14,8 +16,18 @@ public class PlantaUseCase {
 		this.plantaRepositoryPort = plantaRepositoryPort;
 	}
 	
-	public Planta save(Planta planta) {
-		return this.plantaRepositoryPort.save(planta).get();
+	public ApiResponse<Planta>  save(Planta planta) {
+		ApiResponse<Planta> response= new ApiResponse<>();
+		Optional<Planta> opt=this.plantaRepositoryPort.findByClave(planta.getPlanta());
+		if(opt.isPresent() && opt.get().getPlanta().equalsIgnoreCase(planta.getPlanta())) {
+			response.setCode("BUSI-P1");
+			response.setMessage("Ya existe la planta");
+			return response;
+		}
+		Planta result=this.plantaRepositoryPort.save(planta).get();
+		response.setCode("0");
+		response.setData(result);
+		return response;
 	}
 	
 	public Planta update(Planta planta) {

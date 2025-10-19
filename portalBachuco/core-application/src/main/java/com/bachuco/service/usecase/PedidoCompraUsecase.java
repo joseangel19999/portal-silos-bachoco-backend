@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import com.bachuco.model.Documento;
-import com.bachuco.model.PedidoCompraSapDTO;
 import com.bachuco.model.procedores.PedidoCompraDTO;
 import com.bachuco.model.service.DocumentoRepositoryPort;
 import com.bachuco.port.PedidoCompraJdbcRepositoryPort;
@@ -21,8 +20,8 @@ public class PedidoCompraUsecase {
 		this.documentoRepositoryPort = documentoRepositoryPort;
 	}
 
-	public List<PedidoCompraDTO> findAll(String claveSilo,Integer materialId,String fechaInicio,String fechaFin){
-		return this.pedidoCompraJdbcRepositoryPort.findByFilterSiloAndMaterialAnFecha(claveSilo, materialId, fechaInicio, fechaFin);
+	public List<PedidoCompraDTO> findAll(String claveSilo,String claveMaterial,String fechaInicio,String fechaFin){
+		return this.pedidoCompraJdbcRepositoryPort.findByFilterSiloAndMaterialAnFecha(claveSilo, claveMaterial, fechaInicio, fechaFin);
 	}
 	
 	public List<PedidoCompraDTO> findAllPedidosCompraSap(String claveSilo,String claveMaterial,Integer materialId,String fechaInicio,String fechaFin){

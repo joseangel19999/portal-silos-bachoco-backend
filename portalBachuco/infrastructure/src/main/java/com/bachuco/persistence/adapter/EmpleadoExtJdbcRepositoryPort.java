@@ -4,18 +4,17 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
-import com.bachuco.model.EmpleadoExterno;
 import com.bachuco.model.EmpleadoExternoRequest;
 import com.bachuco.model.EmpleadoExternoResponse;
-import com.bachuco.persistence.repository.EmpleadoExternoRepository;
+import com.bachuco.persistence.repository.EmpleadoExternoJdbcRepository;
 import com.bachuco.port.EmpleadoExternoRepositoryPort;
 
 @Component
 public class EmpleadoExtJdbcRepositoryPort implements EmpleadoExternoRepositoryPort {
 
-	private final EmpleadoExternoRepository empleadoExternoRepository;
+	private final EmpleadoExternoJdbcRepository empleadoExternoRepository;
 
-	public EmpleadoExtJdbcRepositoryPort(EmpleadoExternoRepository empleadoExternoRepository) {
+	public EmpleadoExtJdbcRepositoryPort(EmpleadoExternoJdbcRepository empleadoExternoRepository) {
 		this.empleadoExternoRepository = empleadoExternoRepository;
 	}
 

@@ -12,4 +12,5 @@ public interface BodegaRepositoryPort {
 	Bodega findByCodigo(String codigo);
 	Optional<Bodega> findById(Integer id);
 	List<Bodega> findAll();
+	List<Bodega> findBySilo(Integer siloId);
 }

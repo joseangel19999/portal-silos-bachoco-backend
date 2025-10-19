@@ -1,7 +1,5 @@
 package com.bachuco.controller;
 
-import java.util.Optional;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,24 +19,17 @@ import com.bachuco.persistence.adapter.AuthenticationAdapter;
 @RequestMapping("/v1/auth")
 public class AutenticationController {
 
-	// private final AuthenticationUseCase authenticationUseCase;
-	/*
-	 * public AutenticationController(AuthenticationUseCase authenticationUseCase) {
-	 * this.authenticationUseCase = authenticationUseCase; }
-	 */
 	private final AuthenticationAdapter authenticationAdapter;
 
 	public AutenticationController(AuthenticationAdapter authenticationAdapter) {
 		this.authenticationAdapter = authenticationAdapter;
 	}
-
 	@PostMapping("/login")
 	public ResponseEntity<AutenticationResponse> login(@RequestBody LoginRequest request) {
 		String token = this.authenticationAdapter.authenticate(request.username(), request.password());
 		AutenticationResponse response = new AutenticationResponse(token, request.username());
 		return new ResponseEntity<AutenticationResponse>(response, HttpStatus.OK);
 	}
-
 	@PostMapping("/verity-otp")
 	public ResponseEntity<AutenticationResponse> validateOtpAndGenerateToken(@RequestBody OtpRequest otpRequest){
 		 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -48,11 +39,10 @@ public class AutenticationController {
 	            username = userDetails.getUsername();
 	            // List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 	    }
-		String token=this.authenticationAdapter.verifyOtpAnGenerateToken(username, otpRequest.otp());
-		AutenticationResponse response= new AutenticationResponse(token,username);
+		String token=this.authenticationAdapter.verifyOtpAnGenerateToken(otpRequest.username(), otpRequest.otp());
+		AutenticationResponse response= new AutenticationResponse(token,otpRequest.username());
 		return new ResponseEntity<AutenticationResponse>(response,HttpStatus.OK);
 	}
-
 	@PostMapping("/createPassword")
 	public ResponseEntity<?> createPassword(@RequestBody LoginRequest request) {
 		return new ResponseEntity<String>("", HttpStatus.OK);

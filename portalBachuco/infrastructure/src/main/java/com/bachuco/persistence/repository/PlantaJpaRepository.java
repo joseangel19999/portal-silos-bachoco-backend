@@ -11,5 +11,6 @@ import com.bachuco.persistence.entity.PlantaEntity;
 public interface PlantaJpaRepository extends JpaRepository<PlantaEntity,Integer> {
 	
 	public Optional<PlantaEntity> findById(Integer id);
+	public Optional<PlantaEntity> findByPlanta(String clavePlanta);
 
 }

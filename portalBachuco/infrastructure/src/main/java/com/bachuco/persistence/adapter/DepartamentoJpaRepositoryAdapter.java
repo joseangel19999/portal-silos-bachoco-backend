@@ -1,7 +1,10 @@
 package com.bachuco.persistence.adapter;
 
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
+import com.bachuco.mapper.CatalogMapper;
 import com.bachuco.model.Departamento;
 import com.bachuco.persistence.entity.DepartamentoEntity;
 import com.bachuco.persistence.repository.DepartamentoJpaRepository;
@@ -26,4 +29,11 @@ public class DepartamentoJpaRepositoryAdapter implements DepartamentoRepositoryP
 		return new Departamento(entity.getId(),entity.getNombre());
 	}
 
+
+	@Override
+	public List<Departamento> findAll() {
+		return this.departamentoRepository.findAll().stream().map(d->CatalogMapper.toDomain(d)).toList();
+	}
+
+	
 }

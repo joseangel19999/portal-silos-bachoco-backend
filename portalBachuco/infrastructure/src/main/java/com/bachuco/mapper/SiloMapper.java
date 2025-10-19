@@ -1,5 +1,6 @@
 package com.bachuco.mapper;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,15 @@ public class SiloMapper {
 				.nombre(silo.getNombre())
 				.sociedad(silo.getSociedad()).build();
 	}
+	
+	public static SiloEntity toEntitySave(Silo silo) {
+		return SiloEntity.builder()
+				.silo(silo.getSilo())
+				.nombre(silo.getNombre())
+				.stock(new BigDecimal(0))
+				.sociedad(silo.getSociedad()).build();
+	}
+
 
 	public static Silo toDomain(SiloEntity siloEntity) {
 		return new Silo(siloEntity.getId(),siloEntity.getSilo(),siloEntity.getNombre(),siloEntity.getSociedad(),siloEntity.getStock().doubleValue());

@@ -1,5 +1,6 @@
 package com.bachuco.persistence.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,7 @@ public interface BodegaRepository extends JpaRepository<BodegaEntity, Integer> {
     public Integer actualizarNombrePorId(@Param("nombre") String nombre,@Param("nuevoSilo") SiloEntity nuevoSilo, @Param("id") Integer id);
 	
 	public Optional<BodegaEntity> findById(Integer id);
+	
+	public List<BodegaEntity> findBySiloId(Integer siloId);
+	
 }

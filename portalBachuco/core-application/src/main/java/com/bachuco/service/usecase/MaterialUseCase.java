@@ -30,14 +30,16 @@ public class MaterialUseCase {
 	}
 	
 	public void update(Material material) {
-		Optional<Categoria> categoria=categoriaRepositoryPort.findById(material.getMaterialId());
-		Optional<Material> resultado=this.materialRepositoryPort.findById(material.getMaterialId());
-		if(resultado.isPresent()) {
-			Material update= resultado.get();
-			update.setNumero(material.getNumero());
-			update.setDescripcion(material.getDescripcion());
-			update.setCategoria(categoria.get());
-			this.materialRepositoryPort.update(material);
+		Optional<Categoria> categoria = categoriaRepositoryPort.findById(material.getCategoria().getId());
+		if (categoria.isPresent()) {
+			Optional<Material> resultado = this.materialRepositoryPort.findById(material.getMaterialId());
+			if (resultado.isPresent()) {
+				Material update = resultado.get();
+				update.setNumero(material.getNumero());
+				update.setDescripcion(material.getDescripcion());
+				update.setCategoria(categoria.get());
+				this.materialRepositoryPort.update(material);
+			}
 		}
 	}
 	

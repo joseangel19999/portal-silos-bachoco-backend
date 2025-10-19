@@ -3,7 +3,6 @@ package com.bachuco.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +47,7 @@ public class MaterialController {
 	@PutMapping("/{id}")
 	public ResponseEntity<String> update(@PathVariable Integer id,@RequestBody MaterialRequestDTO request){
 		Material material=new Material();
+		material.setMaterialId(id);
 		material.setNumero(request.numero());
 		material.setDescripcion(request.descripcion());
 		Categoria categoria= new Categoria();
@@ -59,6 +59,7 @@ public class MaterialController {
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> delete(@PathVariable Integer id){
+		this.materialUseCase.delete(id);
 		return new ResponseEntity<String>("",HttpStatus.OK);
 	}
 	

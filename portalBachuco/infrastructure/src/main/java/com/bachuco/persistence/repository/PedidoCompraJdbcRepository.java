@@ -54,7 +54,7 @@ public class PedidoCompraJdbcRepository {
 
 	public List<PedidoCompraDTO> findAllByFolioNumCompra(List<String> folios) {
 		String sql = """
-				SELECT
+				  SELECT
 					pc.PEDIDO_COMPRA_ID,
 			        pc.NUMERO_PEDIDO,
 			        pc.POSICION,
@@ -79,19 +79,21 @@ public class PedidoCompraJdbcRepository {
 	    return namedParameterJdbcTemplate.query(sql, params,pedidoCompraRowMapper);
 	}
 	
-	/*public List<PedidoCompraDTO> findAllFolios(List<String> folios) {
+	public List<String> findAllFoliosExist(List<String> folios) {
 		String sql = """
-					select p.FOLIO_NUM_PED_POSICION
-				from tc_pedido_compra p
-                inner join tc_detalle_pedido_compra pc on p.PEDIDO_COMPRA_ID= pc.TC_PEDIDO_COMPRA_ID
-                inner join tc_silo s on p.TC_SILO_ID= s.SILO_ID
-                where pc.FOLIO_NUM_PED_POSICION in (:folios)
+				   SELECT pc.FOLIO_NUM_PED_POSICION
+		            FROM tc_pedido_compra pc
+		            WHERE pc.FOLIO_NUM_PED_POSICION IN (:folios)
 				    """;
 
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("folios", folios);
-	    return namedParameterJdbcTemplate.query(sql, params,pedidoCompraRowMapper);
-	}*/
+		 return namedParameterJdbcTemplate.query(
+		            sql,
+		            params,
+		            (rs, rowNum) -> rs.getString("FOLIO_NUM_PED_POSICION")
+		        );
+	}
 	
 	public List<String> findAllNumeroCompraByFilterProgram(String claveSilo, Integer materialId) {
 		String sql = """
@@ -112,11 +114,11 @@ public class PedidoCompraJdbcRepository {
 			params.put("p_numero_ped_compra", p.getPedCompra());
 			params.put("p_cantidad_pedida", p.getCantidadPedido()!=null?p.getCantidadPedido():0);
 			params.put("p_cantidad_entregada", p.getCantidadEntrega()!=null?p.getCantidadEntrega():0);
-			params.put("p_cantidad_despachada", 0);
-			params.put("p_cantidad_pend_despacho", 0);
+			params.put("p_cantidad_despachada",p.getCantidadDespacho()!=null?p.getCantidadDespacho():0);
+			params.put("p_cantidad_pend_despacho", p.getCantidadPendienteDespacho());
 			params.put("p_clave_material",p.getMaterial());
 			params.put("p_posicion",p.getPosicion());
-			params.put("p_contrato_legal",""); //FALTA CAMPO DE CONTRATO LEGAL
+			params.put("p_contrato_legal",p.getContratoLegal());
 			params.put("p_cert_deposito", "");
 			params.put("p_silo", "CP12");
 			params.put("p_material", "");

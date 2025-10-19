@@ -20,10 +20,10 @@ public class CategoriaJpaAdapter implements CategoriaRepositoryPort {
 	}
 
 	@Override
-	public Optional<Categoria> findById(Integer materialId) {
-		Optional<CategoriaEntity> categoriaEntiry= this.categoriaJpaRepository.findById(materialId);
-		if(!categoriaEntiry.isEmpty()) {
-			Categoria categoria= new Categoria(categoriaEntiry.get().getId(),categoriaEntiry.get().getNombre(),categoriaEntiry.get().getDescripcion());
+	public Optional<Categoria> findById(Integer categoriaId) {
+		Optional<CategoriaEntity> categoriaEntity= this.categoriaJpaRepository.findById(categoriaId);
+		if(!categoriaEntity.isEmpty()) {
+			Categoria categoria= new Categoria(categoriaEntity.get().getId(),categoriaEntity.get().getNombre(),categoriaEntity.get().getDescripcion());
 			return Optional.ofNullable(categoria);
 		}
 		return Optional.empty();

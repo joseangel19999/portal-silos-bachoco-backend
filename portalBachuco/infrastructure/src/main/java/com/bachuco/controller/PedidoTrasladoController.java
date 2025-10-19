@@ -30,10 +30,29 @@ public class PedidoTrasladoController {
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	
+	@GetMapping("/filters/cantidad-disponible")
+	public ResponseEntity<List<PedidoTrasladoDTO>> findAllpedidosCantidad(
+			@RequestParam String siloId,
+			@RequestParam String materialId,
+			@RequestParam String fechaInicio,
+			@RequestParam String fechaFin){
+		List<PedidoTrasladoDTO> response=this.pedidoTrasladoJdbcUseCase
+				.findByFiltersCantidadDisponible(Integer.parseInt(siloId),Integer.parseInt(materialId),fechaInicio, fechaFin);
+		return new ResponseEntity<>(response,HttpStatus.OK);
+	}
+	
+	
 	@GetMapping("/filters/program")
 	public ResponseEntity<List<PedidoTrasladoArriboDTO>> findAllByFilterProgramArribo(@RequestParam Integer siloId,@RequestParam Integer materialId,
 			@RequestParam String planta){
-		List<PedidoTrasladoArriboDTO> response=this.pedidoTrasladoJdbcUseCase.findByFilterProgramArribo(siloId, materialId, "");
+		List<PedidoTrasladoArriboDTO> response=this.pedidoTrasladoJdbcUseCase.findByFilterProgramArribo(siloId,planta,materialId);
+		return new ResponseEntity<>(response,HttpStatus.OK);
+	}
+	
+	@GetMapping("/filters/conf-despacho")
+	public ResponseEntity<List<PedidoTrasladoArriboDTO>> findByPedTrasladoByConfDespacho(@RequestParam Integer siloId,@RequestParam Integer materialId,
+			@RequestParam String planta){
+		List<PedidoTrasladoArriboDTO> response=this.pedidoTrasladoJdbcUseCase.findByPedTrasladoByConfDespacho(siloId,planta,materialId);
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 }

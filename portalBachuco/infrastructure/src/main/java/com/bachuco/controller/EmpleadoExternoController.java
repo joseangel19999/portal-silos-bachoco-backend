@@ -12,11 +12,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.bachuco.dto.BodegaRequestDto;
-import com.bachuco.dto.BodegaResponseDTO;
-import com.bachuco.mapper.BodegaMapper;
-import com.bachuco.model.Bodega;
 import com.bachuco.model.EmpleadoExternoRequest;
 import com.bachuco.model.EmpleadoExternoResponse;
 import com.bachuco.service.usecase.EmpleadoExternoUseCase;

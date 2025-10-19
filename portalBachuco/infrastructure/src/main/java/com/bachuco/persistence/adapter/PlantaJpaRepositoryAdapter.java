@@ -80,4 +80,17 @@ public class PlantaJpaRepositoryAdapter implements PlantaRepositoryPort {
 		return PlantaMapper.toListDomain(listaPlantaEntity);
 	}
 
+	@Override
+	public Optional<Planta> findByClave(String clave) {
+		try{
+			Optional<PlantaEntity> plantaEntity=this.plantaRepository.findByPlanta(clave);
+			if(plantaEntity.isPresent()) {
+				return Optional.ofNullable(PlantaMapper.toDomain(plantaEntity.get()));
+			}
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		}
+		return Optional.empty();
+	}
+
 }

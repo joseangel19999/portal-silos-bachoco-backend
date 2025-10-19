@@ -1,35 +1,36 @@
 package com.bachuco.persistence.config;
-
-
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.bachuco.model.Silo;
 import com.bachuco.model.service.DocumentoRepositoryPort;
 import com.bachuco.port.BodegaRepositoryPort;
-import com.bachuco.port.BodegaSiloRepositoryPort;
 import com.bachuco.port.CategoriaRepositoryPort;
-import com.bachuco.port.CrudGenericRepositoryPort;
+import com.bachuco.port.ConfirmacionDespachoJdbcRepository;
+import com.bachuco.port.DepartamentoRepositoryPort;
 import com.bachuco.port.EmpleadoExternoRepositoryPort;
 import com.bachuco.port.EmpleadoInternoRepositoryPort;
 import com.bachuco.port.EmpleadoRepositoryPort;
 import com.bachuco.port.MaterialRepositoryPort;
 import com.bachuco.port.PedidoCompraJdbcRepositoryPort;
-import com.bachuco.port.PedidoCompraRepositoryPort;
 import com.bachuco.port.PedidoTrasladoJdbcRepositoryPort;
 import com.bachuco.port.PerfilRepositoryPort;
 import com.bachuco.port.PlantaRepositoryPort;
+import com.bachuco.port.ProgramArriboRepositoryPort;
+import com.bachuco.port.PuestoRepositoryPort;
 import com.bachuco.port.ReporteDespachosPort;
 import com.bachuco.port.ReporteProgramArriboPort;
 import com.bachuco.port.SiloRepositoryPort;
 import com.bachuco.port.UsuarioRepositoryPort;
 import com.bachuco.service.usecase.BodegaUsecase;
+import com.bachuco.service.usecase.ConfirmacionDespachoUseCase;
+import com.bachuco.service.usecase.DepartamentoUseCase;
 import com.bachuco.service.usecase.EmpleadoExternoUseCase;
 import com.bachuco.service.usecase.EmpleadoUseCase;
 import com.bachuco.service.usecase.MaterialUseCase;
 import com.bachuco.service.usecase.PedidoCompraUsecase;
 import com.bachuco.service.usecase.PedidoTrasladoJdbcUseCase;
 import com.bachuco.service.usecase.PlantaUseCase;
+import com.bachuco.service.usecase.ProgramArriboUseCase;
+import com.bachuco.service.usecase.PuestoUseCase;
 import com.bachuco.service.usecase.ReporteDespachoUseCase;
 import com.bachuco.service.usecase.ReporteProgramArriboUseCase;
 import com.bachuco.service.usecase.SiloUseCase;
@@ -101,4 +102,23 @@ public class BeansConfig {
 		return new EmpleadoExternoUseCase(empExternoRepositoryPort);
 	}
 	
+	@Bean
+	public ConfirmacionDespachoUseCase confirmacionDespachoUseCase(ConfirmacionDespachoJdbcRepository port) {
+		return new ConfirmacionDespachoUseCase(port);
+	}
+	
+	@Bean
+	public DepartamentoUseCase departamentoUseCase(DepartamentoRepositoryPort deptoRepositoryPort) {
+		return new DepartamentoUseCase(deptoRepositoryPort);
+	}
+	
+	@Bean
+	public PuestoUseCase puestoUseCase(PuestoRepositoryPort puestoRepositoryPort) {
+		return new PuestoUseCase(puestoRepositoryPort);
+	}
+	
+	@Bean
+	public ProgramArriboUseCase programArriboUseCase(ProgramArriboRepositoryPort programArriboRepositoryPort) {
+		return new ProgramArriboUseCase(programArriboRepositoryPort);
+	}
 }

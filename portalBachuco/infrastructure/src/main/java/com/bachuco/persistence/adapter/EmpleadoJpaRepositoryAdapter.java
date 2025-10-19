@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import com.bachuco.model.Departamento;
 import com.bachuco.model.Empleado;
 import com.bachuco.model.EmpleadoInterno;
+import com.bachuco.model.EmpleadoInternoRequest;
+import com.bachuco.model.EmpleadoResponse;
 import com.bachuco.model.Perfil;
 import com.bachuco.model.Usuario;
 import com.bachuco.persistence.entity.DepartamentoEntity;
@@ -18,6 +20,7 @@ import com.bachuco.persistence.entity.EmpleadoEntity;
 import com.bachuco.persistence.entity.EmpleadoInternoEntity;
 import com.bachuco.persistence.entity.PerfilEntity;
 import com.bachuco.persistence.entity.UsuarioEntity;
+import com.bachuco.persistence.repository.CatalogJdbcRepository;
 import com.bachuco.persistence.repository.EmpleadoInternoJpaRepository;
 import com.bachuco.persistence.repository.EmpleadoJpaRepository;
 import com.bachuco.persistence.repository.UsuarioJpaRepository;
@@ -29,12 +32,17 @@ public class EmpleadoJpaRepositoryAdapter implements EmpleadoRepositoryPort{
 	private final EmpleadoJpaRepository empleadoJpaRepository;
 	private final EmpleadoInternoJpaRepository empleadoInternoJpaRepository;
 	private final UsuarioJpaRepository usuarioRepository;
+	private final CatalogJdbcRepository catalogJdbcRepository;
+
+
 
 	public EmpleadoJpaRepositoryAdapter(EmpleadoJpaRepository empleadoJpaRepository,
-			EmpleadoInternoJpaRepository empleadoInternoJpaRepository, UsuarioJpaRepository usuarioRepository) {
+			EmpleadoInternoJpaRepository empleadoInternoJpaRepository, UsuarioJpaRepository usuarioRepository,
+			CatalogJdbcRepository catalogJdbcRepository) {
 		this.empleadoJpaRepository = empleadoJpaRepository;
 		this.empleadoInternoJpaRepository = empleadoInternoJpaRepository;
 		this.usuarioRepository = usuarioRepository;
+		this.catalogJdbcRepository = catalogJdbcRepository;
 	}
 
 	@Override
@@ -42,15 +50,6 @@ public class EmpleadoJpaRepositoryAdapter implements EmpleadoRepositoryPort{
 		Optional<UsuarioEntity> usuarioEntity= this.usuarioRepository.findById(empleado.getUsuario().getId());
 		EmpleadoEntity empEntity= toEntity(empleado);
 		empEntity.setUsuario(usuarioEntity.get());
-		return toDomain(this.empleadoJpaRepository.save(empEntity));
-	}
-
-	@Override
-	public Empleado update(Empleado empleado) {
-		// TODO Auto-generated method stub
-		UsuarioEntity usuarioEntity= this.usuarioRepository.findById(empleado.getUsuario().getId()).get();
-		EmpleadoEntity empEntity= toEntity(empleado);
-		empEntity.setUsuario(usuarioEntity);
 		return toDomain(this.empleadoJpaRepository.save(empEntity));
 	}
 
@@ -65,7 +64,6 @@ public class EmpleadoJpaRepositoryAdapter implements EmpleadoRepositoryPort{
 	
 	@Override
 	public Empleado findById(Integer id) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -101,7 +99,6 @@ public class EmpleadoJpaRepositoryAdapter implements EmpleadoRepositoryPort{
 
 	@Override
 	public List<EmpleadoInterno> findAll() {
-		// TODO Auto-generated method stub
 		List<EmpleadoInternoEntity> empleados=this.empleadoInternoJpaRepository.findAll();
 		return empleados.stream().map(p->toEmpleadoInternoDomain(p)).toList();
 	}
@@ -147,11 +144,13 @@ public class EmpleadoJpaRepositoryAdapter implements EmpleadoRepositoryPort{
 		dep.setNombre(e.getNombre());
 		return dep;
 	}
-	/*private Perfil toPerfilDomain(PerfilEntity e) {
-		Perfil p= new Perfil();
-		p.setId(e.getId());
-		p.setClave(e.getClave());
-		p.setDescripcion(e.getDescripcion());
-		return p;
-	}*/
+
+	@Override
+	public Optional<EmpleadoResponse> findByClaveUsuarioOrCorreo(String value) {
+		return this.catalogJdbcRepository.findByUsuarioOrCorreo(value);
+	}
+
+	@Override
+	public void update(Integer id, EmpleadoInternoRequest req) {
+	}
 }

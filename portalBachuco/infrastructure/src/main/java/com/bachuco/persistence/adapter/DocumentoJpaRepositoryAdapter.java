@@ -31,8 +31,9 @@ public class DocumentoJpaRepositoryAdapter implements DocumentoRepositoryPort {
 		Path destinationPath = Paths.get(ruta, nameFileConcatExtencion(nombreDocumento,DocumentoUtil.typeDocumentoPdf));
 		Files.createDirectories(destinationPath.getParent());
 		Files.write(destinationPath, documento.getContenido());
-		pedidoCompraJpaRepository.actualizarUrlDocument(ruta.concat(nombreDocumento),documento.getExtencion(), pedidoCompraId);
-		return nombreDocumento;
+		String newPathFile=ruta.concat(nombreDocumento);
+		pedidoCompraJpaRepository.actualizarUrlDocument(newPathFile,documento.getExtencion(), pedidoCompraId);
+		return newPathFile;
 	}
 
 	@Override

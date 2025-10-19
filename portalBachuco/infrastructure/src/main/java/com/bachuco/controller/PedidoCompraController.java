@@ -37,14 +37,9 @@ public class PedidoCompraController {
 
 	@GetMapping("/filters")
 	public ResponseEntity<List<PedidoCompraDTO>> findAllByFilter(@RequestParam String claveSilo,
-			@RequestParam Integer materialId, @RequestParam String fechaInicio, @RequestParam String fechaFin) {
-		try {
-			List<PedidoCompraDTO> response = this.pedidoCompraUsecase.findAll(claveSilo, materialId, fechaInicio, fechaFin);
+			@RequestParam String claveMaterial, @RequestParam String fechaInicio, @RequestParam String fechaFin) {
+			List<PedidoCompraDTO> response = this.pedidoCompraUsecase.findAll(claveSilo, claveMaterial, fechaInicio, fechaFin);
 			return new ResponseEntity<List<PedidoCompraDTO>>(response, HttpStatus.OK);
-		}catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-
 	}
 
 	@PostMapping("/upload-pdf")

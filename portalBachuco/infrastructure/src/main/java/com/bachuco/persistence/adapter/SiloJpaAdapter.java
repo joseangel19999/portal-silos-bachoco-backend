@@ -22,7 +22,7 @@ public class SiloJpaAdapter implements SiloRepositoryPort{
 
 	@Override
 	public 	Optional<Silo> save(Silo model) {
-		SiloEntity entity=this.siloJpaRepository.save(SiloMapper.toEntity(model));
+		SiloEntity entity=this.siloJpaRepository.save(SiloMapper.toEntitySave(model));
 		return Optional.ofNullable(SiloMapper.toDomain(entity));
 	}
 
@@ -83,6 +83,15 @@ public class SiloJpaAdapter implements SiloRepositoryPort{
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
+		}
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<Silo> findByClave(String clave) {
+		Optional<SiloEntity> entity=this.siloJpaRepository.findBySilo(clave);
+		if(entity.isPresent()) {
+			return Optional.ofNullable(SiloMapper.toDomain(entity.get()));
 		}
 		return Optional.empty();
 	}

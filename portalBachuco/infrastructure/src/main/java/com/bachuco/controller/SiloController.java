@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bachuco.dto.SiloRequestDto;
 import com.bachuco.dto.SiloResponseDto;
 import com.bachuco.mapper.SiloMapper;
+import com.bachuco.model.ApiResponse;
 import com.bachuco.model.Silo;
 import com.bachuco.service.usecase.SiloUseCase;
 
@@ -31,9 +32,18 @@ public class SiloController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<SiloResponseDto> save(@RequestBody SiloRequestDto request){
+	public ResponseEntity<ApiResponse<SiloResponseDto>> save(@RequestBody SiloRequestDto request){
 		Silo silo=SiloMapper.toDomain(request);
-		return new ResponseEntity<SiloResponseDto>(SiloMapper.toResponse(this.siloUsecase.save(silo)),HttpStatus.OK);
+		ApiResponse<SiloResponseDto> response= new ApiResponse();
+		ApiResponse<Silo> result=this.siloUsecase.save(silo);
+		if(result.getCode().equals("0")) {
+			response.setCode("0");
+			response.setData(SiloMapper.toResponse(result.getData()));
+		}else {
+			response.setCode(result.getCode());
+			response.setMessage(result.getMessage());
+		}
+		return new ResponseEntity<ApiResponse<SiloResponseDto>>(response,HttpStatus.OK);
 	}
 	
 	@GetMapping
