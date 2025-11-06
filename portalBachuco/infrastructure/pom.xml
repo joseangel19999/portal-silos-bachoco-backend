@@ -5,11 +5,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.bachuco</groupId>
-		<artifactId>portalBachuco</artifactId>
+		<groupId>com.bachoco</groupId>
+		<artifactId>BachocoSilos</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
-	<groupId>com.bachuco</groupId>
+	<groupId>com.bachoco</groupId>
 	<artifactId>infrastructure</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>infrastructure</name>
@@ -88,12 +88,12 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.bachuco</groupId>
+			<groupId>com.bachoco</groupId>
 			<artifactId>core-domain</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.bachuco</groupId>
+			<groupId>com.bachoco</groupId>
 			<artifactId>core-application</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
@@ -138,4 +138,14 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.1</version> <configuration>
+                <parameters>true</parameters> </configuration>
+        </plugin>
+    </plugins>
+</build>
 </project>

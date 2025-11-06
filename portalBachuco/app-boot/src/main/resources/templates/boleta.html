@@ -1,171 +1,137 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8" />
-    <style>
+	<meta charset="UTF-8" />
+	<style>
 		/* Estilos básicos para la estructura y el texto */
-		*, *::before, *::after {
-		  box-sizing: border-box;
+		*,
+		*::before,
+		*::after {
+			box-sizing: border-box;
 		}
+
 		* {
-		  margin: 0;
-		  padding: 0;
+			margin: 0;
+			padding: 0;
 		}
-		        body {
-		            font-family: Arial, sans-serif;
-		            font-size: 10pt;
-		            margin: 0;
-		            padding: 0;
-		        }
-		        .container {
-		            width: 100%;
-		            padding: 20px;
-		        }
-		        .header, .info-section {
-		            border: 1px solid #000;
-		            margin-bottom: 10px;
-		            padding: 5px;
-		            overflow: hidden; /* Para contener los floats */
-		        }
-		        .float-left {
-		            float: left;
-		        }
-		        .float-right {
-		            float: right;
-		        }
-		        .section-title {
-		            font-weight: bold;
-		            text-align: center;
-		            margin-bottom: 5px;
-		        }
-		        .data-label {
-		            font-weight: bold;
-		            margin-right: 5px;
-		        }
-		        .half-width {
-		            width: 48%;
-		        }
-		        .third-width {
-		            width: 30%;
-		        }
-		        /* Estilos para la tabla de pesos y descuentos */
-		        .table-data {
-		            width: 100%;
-		            border-collapse: collapse;
-		            margin-top: 10px;
-		            font-size: 9pt;
-		        }
-		        .table-data td {
-		            padding: 2px 5px;
-		            border-bottom: 1px dotted #ccc;
-		        }
-		        .table-header {
-		            font-weight: bold;
-		            text-align: center;
-		            border-bottom: 2px solid #000;
-		        }
-    </style>
+
+		body {
+			font-family: Arial, sans-serif;
+			font-size: 10pt;
+			margin: 0;
+			padding: 0;
+		}
+
+		.container {
+			width: 100%;
+			padding: 20px;
+		}
+
+		.header,
+		.info-section {
+			margin-bottom: 10px;
+			padding: 5px;
+			overflow: hidden;
+			/* Para contener los floats */
+		}
+
+		.float-left {
+			float: left;
+		}
+
+		.float-right {
+			float: right;
+		}
+
+		.section-title {
+			font-weight: bold;
+			text-align: center;
+			margin-bottom: 5px;
+		}
+
+		.data-label {
+			font-weight: bold;
+			margin-right: 5px;
+		}
+
+		.half-width {
+			width: 48%;
+		}
+
+		.third-width {
+			width: 30%;
+		}
+
+		/* Estilos para la tabla de pesos y descuentos */
+		.table-data {
+			width: 100%;
+			margin-top: 10px;
+			border: none;
+			font-size: 9pt;
+		}
+
+		.table-data td {
+			padding: 2px 5px;
+			border: none;
+		}
+
+		.table-header {
+			font-weight: bold;
+			text-align: center;
+			border: none;
+		}
+	</style>
 </head>
+
 <body>
 	<div class="container">
+		<div class="header">
+			<div class="float-left" style="width: 30%;">
+				<img src="logo.png" alt="Logo de la empresa"
+					style="max-width: 150px; height: auto; display: block; margin: auto;" />
+				<!--<p style="font-weight: bold; margin-top: 5px;">ALMACEN: MATAMOROS</p>-->
+			</div>
 
-	    <div class="header">
-	        <div class="float-left" style="width: 30%;">
-				<img src="/images/logo.png"
-				         alt="Logo de la empresa" 
-				         style="max-width: 100px; height: auto; display: block; margin: auto;"/>
-	            <p style="font-weight: bold; margin-top: 5px;">ALMACEN: MATAMOROS</p>
-	        </div>
+			<div class="float-left" style="width: 35%; text-align: center;">
+				<p style="font-size: 12pt; font-weight: bold;" th:text="${boleta.nombreSilo}">(CLIENTE)</p>
+				<p style="font-size: 8pt; margin: 0;">Proveedor del silo</p>
+				<p style="font-size: 14pt; font-weight: bold; margin: 10px 0;">
+					BOLETA DE SALIDA No. <span th:text="${boleta.numeroBoleta}">161</span>
+				</p>
+			</div>
+		</div>
+		<br />
+		<br />
+		<div class="info-section">
+			<div class="float-left half-width">
+				<p><span class="data-label">GUIA:</span> <span style="font-weight: bold; font-size: 12pt;"
+						th:text="${boleta.guia}">161</span></p>
+				<p style="font-size: 12pt; font-weight: bold;"><span class="data-label">PRODUCTO:</span> <span
+						th:text="${boleta.producto}">SORGO ROJO</span></p>
+				<br />
+				<p><span class="data-label">PESO BRUTO:</span> <span
+						th:text="${#numbers.formatDecimal(boleta.pesoBruto, 1, 2)}">56.820</span> TON</p>
+				<p><span class="data-label">TARA:</span> <span
+						th:text="${#numbers.formatDecimal(boleta.tara, 1, 2)}">16.800</span> TON</p>
+				<p style="font-weight: bold;"><span class="data-label">PESO NETO:</span> <span
+						th:text="${#numbers.formatDecimal(boleta.pesoNeto, 1, 2)}">40.020</span> TON</p>
+				<p><span class="data-label">HUMEDAD:</span> <span th:text="${#numbers.formatDecimal(boleta.humedad, 1, 2)} + ' %'"></span></p>
+			</div>
 
-	        <div class="float-left" style="width: 35%; text-align: center;">
-	            <p style="font-size: 12pt; font-weight: bold;">(CLIENTE)</p>
-	            <p style="font-size: 8pt; margin: 0;">Proveedor del silo</p>
-	            <p style="font-size: 14pt; font-weight: bold; margin: 10px 0;">
-	                BOLETA DE SALIDA No. <span th:text="${boleta.numeroBoleta}">161</span>
-	            </p>
-	        </div>
 
-	        <div class="float-right" style="width: 30%; border: 2px solid #000; padding: 5px;">
-	            <p style="font-weight: bold; font-size: 10pt; margin: 0;" th:text="${boleta.proveedor.nombre}">
-	                GRANEROS CONTINENTAL, S.A. DE C.V.
-	            </p>
-	            <p style="margin: 0;" th:text="${boleta.proveedor.direccion}">
-	                SENDERO NACIONAL KM. 1 S/N, COL. H. MATAMOROS, TAMAULIPAS
-	            </p>
-	            <p style="margin: 0;">
-	                <span class="data-label">C.P.</span> 87325 <span class="data-label">RFC:</span> <span th:text="${boleta.proveedor.rfc}">GCO070803V61</span>
-	            </p>
-	            <p style="margin: 0;"><span class="data-label">TEL.:</span> <span th:text="${boleta.proveedor.telefono}">8688166509</span></p>
-	        </div>
-	    </div>
+		</div>
+		<br />
+		<br />
+		<div class="info-section">
+			<div class="float-left half-width">
+				<p><span class="data-label">No. TICKET BASCULA:</span> <span
+						th:text="${boleta.numeroTicketBascula}">00161</span></p>
+				<p><span class="data-label">OBSERVACIONES:</span> <span th:text="${boleta.observaciones}"></span></p>
 
-	    <div class="info-section">
-	        <div class="float-left half-width">
-	            <p><span class="data-label">CLIENTE:</span> <span th:text="${boleta.cliente.nombre}">BACHOCÓ, S.A. DE C.V.</span></p>
-	            <p th:text="${boleta.cliente.direccion}">AV. TECNOLÓGICO 401, COL. ZONA INDUSTRIAL CELAYA, GTO. C.P. 38010</p>
-	            <p><span class="data-label">R.F.C.:</span> <span th:text="${boleta.cliente.rfc}">BAC800208B25</span></p>
-	            <p><span class="data-label">CIA. TRANSPORTISTA:</span> <span th:text="${boleta.transportista}">TRANSPORTES ZAVALA</span></p>
-	            <p><span class="data-label">GUIA:</span> <span style="font-weight: bold; font-size: 12pt;" th:text="${boleta.guia}">161</span></p>
-	            <p><span class="data-label">CHOFER:</span> <span th:text="${boleta.chofer}">JUAN ANTONIO MOZQUEDA ROBLES</span></p>
-	            <p><span class="data-label">PLACAS VEHICULO:</span> <span th:text="${boleta.placasVehiculo}">06 BB4L</span></p>
-	            <p><span class="data-label">PLACAS REMOLQUE:</span> <span th:text="${boleta.placasRemolque}">21 UP8G</span></p>
-	        </div>
-
-	        <div class="float-right half-width">
-	            <p><span class="data-label">FECHA:</span> <span th:text="${boleta.fecha}">15-ago-25</span> <span class="data-label">TEMPORADA:</span> <span>OI-24-25</span></p>
-	            <p><span class="data-label">HORA:</span> <span th:text="${boleta.hora}">06:47:44 p.m.</span></p>
-	            <p><span class="data-label">ORDEN DE EMBARQUE:</span></p>
-	            <p style="font-size: 12pt; font-weight: bold;"><span class="data-label">PRODUCTO:</span> <span th:text="${boleta.producto}">SORGO ROJO</span></p>
-	            <br/>
-	            <p><span class="data-label">PESO BRUTO:</span> <span th:text="${#numbers.formatDecimal(boleta.pesoBruto, 1, 3)}">56.820</span> TON</p>
-	            <p><span class="data-label">TARA:</span> <span th:text="${#numbers.formatDecimal(boleta.tara, 1, 3)}">16.800</span> TON</p>
-	            <p style="font-weight: bold;"><span class="data-label">PESO NETO:</span> <span th:text="${#numbers.formatDecimal(boleta.pesoNeto, 1, 3)}">40.020</span> TON</p>
-	        </div>
-	    </div>
-
-	    <div class="info-section">
-	        <div class="float-left half-width">
-	            <p><span class="data-label">No. TICKET BASCULA:</span> <span th:text="${boleta.numeroTicketBascula}">00161</span></p>
-	            <p><span class="data-label">CARTA PORTE:</span></p>
-	            <p><span class="data-label">NOTA DE ENTRADA:</span></p>
-	            <p><span class="data-label">OBSERVACIONES:</span> <span th:text="${boleta.observaciones}">DESTINO BACHOCO CELAYA GTO. NO. DE PEDIDO 4509676340</span></p>
-	        </div>
-
-	        <div class="float-right half-width">
-	            <p style="font-weight: bold; text-align: center;">DESCUENTO POR NORMAS</p>
-	            <table class="table-data">
-	                <thead>
-	                    <tr>
-	                        <td class="table-header">HUMEDAD:</td>
-	                        <td class="table-header">IMPUREZAS:</td>
-	                        <td class="table-header">QUEBRADO:</td>
-	                        <td class="table-header">DAÑADO:</td>
-	                    </tr>
-	                </thead>
-	                <tbody>
-	                    <tr>
-	                        <td th:text="${#numbers.formatDecimal(boleta.humedad, 1, 2)} + ' %'">14.00 %</td>
-	                        <td th:text="${#numbers.formatDecimal(boleta.impurezas, 1, 2)} + ' %'">0.00 %</td>
-	                        <td th:text="${#numbers.formatDecimal(boleta.quebrado, 1, 2)} + ' %'">0.00 %</td>
-	                        <td th:text="${#numbers.formatDecimal(boleta.danado, 1, 2)} + ' %'">0.00 %</td>
-	                    </tr>
-	                </tbody>
-	            </table>
-	        </div>
-	    </div>
-
-	    <div style="margin-top: 30px; text-align: center;">
-	        <div class="float-left third-width">
-	            <hr style="width: 80%;"/>
-	            <p th:text="${boleta.chofer}">JUAN ANTONIO MOZQUEDA ROBLES</p>
-	            <p style="font-weight: bold;">CHOFER Y/O AGRICULTOR</p>
-	        </div>
-	        <div class="float-right third-width" style="text-align: right;">
-	            <p style="font-weight: bold; margin-top: 25px;">Pedido de traslado</p>
-	            <p style="font-weight: bold;">PESADOR Y ANALISTA</p>
-	        </div>
-	    </div>
-
+			</div>
+		</div>
 	</div>
 </body>
+
 </html>
