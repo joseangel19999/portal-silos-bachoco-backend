@@ -36,20 +36,23 @@ public class ProgramArriboRepositoryAdapter implements ProgramArriboRepositoryPo
 	}
 
 	@Override
-	public Double stockSilo(String claveSilo) {
-		// TODO Auto-generated method stub
-		Double response=this.programArriboSapRepositoryPor.stockSilo(claveSilo, sapProperties.getUrl());
+	public Double stockSilo(String claveSilo,String material) {
+		Double response=this.programArriboSapRepositoryPor.stockSilo(claveSilo,material, sapProperties.getUrl());
+		//Double response=3450488.00D;
 		if(response!=null) {
 			this.catalogJdbcRepository.resetStockSilo(String.valueOf(response), claveSilo,1);
+			return response;
 		}else {
-			Optional<SiloEntity> opt=this.siloJpaRepository.findBySilo(claveSilo);
-			if(opt.isPresent()) {
-				return opt.get().getStock().doubleValue();
-			}else {
-				return null;
-			}
+			this.catalogJdbcRepository.resetStockSilo(String.valueOf("0"), claveSilo,1);
+			return 0.0D;
 		}
-		return response;
+		/*Optional<SiloEntity> opt=this.siloJpaRepository.findBySilo(claveSilo);
+		if(opt.isPresent()) {
+			return opt.get().getStock().doubleValue();
+		}else {
+			return null;
+		}
+		return response;*/
 	}
 
 	@Override

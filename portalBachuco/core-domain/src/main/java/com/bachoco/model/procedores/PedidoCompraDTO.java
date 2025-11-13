@@ -7,6 +7,7 @@ public class PedidoCompraDTO {
 	private Float cantidadPedida;
 	private Float cantidadEntregada;
 	private Float cantidadDespachada;
+	private Float cantidadPendienteDespachada;
 	private String contratoLegal;
 	private String urlCertificadoDeposito;
 	private String tipoExtencion;
@@ -95,7 +96,13 @@ public class PedidoCompraDTO {
 	public void setFolioPedCompraPosicion(String folioPedCompraPosicion) {
 		this.folioPedCompraPosicion = folioPedCompraPosicion;
 	}
-	
-	
+
+	public Float getCantidadPendienteDespachada() {
+		return cantidadPendienteDespachada;
+	}
+
+	public void setCantidadPendienteDespachada(Float cantidadPendienteDespachada) {
+		this.cantidadPendienteDespachada = cantidadPendienteDespachada;
+	}
 	
 }

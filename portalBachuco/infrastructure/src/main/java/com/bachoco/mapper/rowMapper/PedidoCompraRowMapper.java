@@ -20,6 +20,7 @@ public class PedidoCompraRowMapper implements RowMapper<PedidoCompraDTO> {
 		pedido.setCantidadPedida(rs.getFloat("CANTIDAD_PEDIDA"));
 		pedido.setCantidadEntregada(rs.getFloat("CANTIDAD_ENTREGADA"));
 		pedido.setCantidadDespachada(rs.getFloat("CANTIDAD_DESPACHADA"));
+		pedido.setCantidadPendienteDespachada(rs.getFloat("CANTIDAD_PENDIENTE_DESPACHO"));
 		if(rs.getString("CONTRATO_LEGAL")==null) {
 			pedido.setContratoLegal("");
 		}else {

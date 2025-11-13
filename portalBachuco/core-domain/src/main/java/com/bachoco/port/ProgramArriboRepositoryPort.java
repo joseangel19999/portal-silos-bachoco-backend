@@ -6,6 +6,6 @@ import com.bachoco.model.ProgramArriboRequest;
 
 public interface ProgramArriboRepositoryPort {
 
-	public Double stockSilo(String claveSilo);
+	public Double stockSilo(String claveSilo,String material);
 	public String saveProgramArrivo(List<ProgramArriboRequest> arribos);
 }

@@ -13,8 +13,8 @@ public class ProgramArriboUseCase {
 		this.programArriboRepositoryPort = programArriboRepositoryPort;
 	}
 	
-	public Double stockSilo(String claveSilo) {
-		return this.programArriboRepositoryPort.stockSilo(claveSilo);
+	public Double stockSilo(String claveSilo,String material) {
+		return this.programArriboRepositoryPort.stockSilo(claveSilo,material);
 	}
 	
 	public String saveProgramArribo(List<ProgramArriboRequest> req) {

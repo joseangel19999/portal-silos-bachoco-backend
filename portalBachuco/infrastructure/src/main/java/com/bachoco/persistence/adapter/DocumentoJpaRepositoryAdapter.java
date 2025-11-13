@@ -32,7 +32,7 @@ public class DocumentoJpaRepositoryAdapter implements DocumentoRepositoryPort {
 		Files.createDirectories(destinationPath.getParent());
 		Files.write(destinationPath, documento.getContenido());
 		String newPathFile=ruta.concat(nombreDocumento);
-		pedidoCompraJpaRepository.actualizarUrlDocument(newPathFile,documento.getExtencion(), pedidoCompraId);
+		pedidoCompraJpaRepository.actualizarUrlDocument(newPathFile,documento.getNombre(), pedidoCompraId);
 		return newPathFile;
 	}
 

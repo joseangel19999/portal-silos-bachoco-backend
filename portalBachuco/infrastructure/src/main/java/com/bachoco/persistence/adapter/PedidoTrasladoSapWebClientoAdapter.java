@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.bachoco.dto.pedTraslado.dto.SapPedidoTrasladoResponse;
+import com.bachoco.exception.SapConnectionException;
 import com.bachoco.mapper.PedidoTrasladoSapClientMapper;
 import com.bachoco.model.PedidoTrasladoSapResponseDTO;
 import com.bachoco.persistence.config.HttpUrlConnectionClient;
@@ -35,15 +36,17 @@ public class PedidoTrasladoSapWebClientoAdapter implements PedidoTrasladoSapPort
 
 	@Override
 	public List<PedidoTrasladoSapResponseDTO> findAllPedTraslado(String claveSilo, String claveMaterial,
-			String fechaInicio, String fechaFin, String rutaUrl) {
+			String plantaDestino,String fechaInicio, String fechaFin, String rutaUrl) {
 		List<PedidoTrasladoSapResponseDTO> response= new ArrayList<>();
 		String endpoint;
+		logger.info("===============PEDIDO TRASLADO====================== ");
+		logger.info("URL::: "+rutaUrl);
 		HttpUrlConnectionClient client=new HttpUrlConnectionClient(rutaUrl,
-				sapProperties.getUsername(),sapProperties.getPassword());
+				sapProperties.getUserName(),sapProperties.getPassWord());
 		if(filtersiloSilo==1) {
 			endpoint=WebClientUtils.buildUrlPedioTraslado(claveSilo, "", "", "", true);
 		}else {
-			endpoint=WebClientUtils.buildUrlPedioTraslado(claveSilo, fechaInicio, fechaFin,Integer.valueOf(claveMaterial), true);
+			endpoint=WebClientUtils.buildUrlPedioTraslado(claveSilo, fechaInicio, fechaFin,Integer.valueOf(claveMaterial),plantaDestino, true);
 		}
 		try {
 			String jsonResponse = client.get(endpoint);
@@ -57,13 +60,13 @@ public class PedidoTrasladoSapWebClientoAdapter implements PedidoTrasladoSapPort
 			objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 			SapPedidoTrasladoResponse responseSap= objectMapper.readValue(jsonResponse, SapPedidoTrasladoResponse.class);
 			return responseSap.getItems().stream().map(p->PedidoTrasladoSapClientMapper.toDomain(p)).toList();
-		} catch (InvalidFormatException e) {
+		}catch (InvalidFormatException e) {
 			logger.error("Error en la conexion de SAP pedido traslado: "+e.getMessage());
-			return response;
+			throw new SapConnectionException("Hubo error en conexion a SAP: "+e.getCause());
 		}catch (IOException e) {
 			logger.error("Error en la conexion de SAP pedido traslado: "+e.getMessage());
+			throw new SapConnectionException("Hubo error en conexion a SAP: "+e.getCause());
 		}
-		return response;
 	}
 
 }

@@ -91,6 +91,14 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 	
+	@ExceptionHandler(SapConnectionException.class)
+	public ResponseEntity<ApiError> handleSapConnectionException(SapConnectionException io,
+			HttpServletRequest request){
+		ApiError error = new ApiError(HttpStatus.NOT_FOUND.value(), "error-code:CON-SAP-01", io.getMessage(),
+				request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
+	
 	@ExceptionHandler(AuthenticationException.class)
 	public ResponseEntity<ApiError> handleAuthException(AuthenticationException ex,
 			HttpServletRequest request) {
@@ -148,7 +156,21 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 	
+	@ExceptionHandler(CannotDeleteResourceException.class)
+	public ResponseEntity<ApiError> handleIoCannotDeleteResourceException(CannotDeleteResourceException io,
+			HttpServletRequest request){
+		ApiError error = new ApiError(HttpStatus.NOT_FOUND.value(), "error-code:violation-integration", io.getMessage(),
+				request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
 	
+	@ExceptionHandler(CannotRegisterProgramArriboException.class)
+	public ResponseEntity<ApiError> handleCannotRegisterProgramArriboException(CannotRegisterProgramArriboException io,
+			HttpServletRequest request){
+		ApiError error = new ApiError(HttpStatus.NOT_FOUND.value(), "error-code:no-reg-program-01", io.getMessage(),
+				request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
 	
 	@ExceptionHandler(IOException.class)
 	public ResponseEntity<ApiError> handleIoException(IOException io,
@@ -157,6 +179,7 @@ public class GlobalExceptionHandler {
 				request.getRequestURI());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
+	
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiError> handleException(Exception io,

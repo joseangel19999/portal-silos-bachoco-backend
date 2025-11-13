@@ -6,16 +6,20 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
+import com.bachoco.exception.CannotRegisterProgramArriboException;
 import com.bachoco.model.ProgramArriboRequest;
 
 @Repository
 public class ProgramArriboJdbcRepository {
 
+	private static final Logger logger = LoggerFactory.getLogger(ProgramArriboJdbcRepository.class);
 	private final JdbcTemplate jdbcTemplate;
 	private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	private SimpleJdbcCall simpleJdbcCall;
@@ -46,7 +50,7 @@ public class ProgramArriboJdbcRepository {
 		return -1;
 	}
 	
-	public String saveProgramArribo(List<ProgramArriboRequest> req) {
+	public String saveProgramArribo(List<ProgramArriboRequest> req){
 		this.simpleJdbcCall = new SimpleJdbcCall(dataSource).withProcedureName("sp_inserta_program_arribo");
 		for (ProgramArriboRequest p : req) {
 			Map<String, Object> params = new HashMap<>();
@@ -60,7 +64,8 @@ public class ProgramArriboJdbcRepository {
 			try {
 				simpleJdbcCall.execute(params);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("no se pudo crear la progracion arribo: "+e.getMessage());
+				throw new CannotRegisterProgramArriboException();
 			}
 		}
 		restaCantidadPedTraslado(req);

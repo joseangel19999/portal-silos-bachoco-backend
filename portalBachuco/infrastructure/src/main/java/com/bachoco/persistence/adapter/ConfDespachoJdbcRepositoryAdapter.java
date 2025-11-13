@@ -1,11 +1,13 @@
 package com.bachoco.persistence.adapter;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
 import com.bachoco.dto.sap.confDespacho.SapResponse;
 import com.bachoco.model.ConfDespachoPesosRequest;
+import com.bachoco.model.ConfirmDespachoResponse;
 import com.bachoco.model.ConfirmacionDespachoRequest;
 import com.bachoco.model.ConfirmacionDespachoResponse;
 import com.bachoco.persistence.repository.CatalogJdbcRepository;
@@ -95,16 +97,26 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 			Float pesoNeto = req.getPesoBruto() - req.getPesoTara();
 			Float pesoNetoOld = req.getPesoBruto() - req.getPesoTara();
 			Float differencia=0F;
+			Float pesoNetoOldSinModified=0.0F;
+			String jsonResponse="";
 			if(req.getTipoMovimiento().equals("352")) {
 				pesoNetoOld=this.confDespachoJdbcRepository.findPesoNetoByIdPedtraslado(req.getIdconfDespacho());
-				isSuma=this.isSuma(pesoNetoOld, pesoNeto);
+				pesoNetoOldSinModified=pesoNetoOld;
+				if(pesoNeto!=null && pesoNetoOld!=null) {
+					isSuma=this.isSuma(pesoNetoOld, pesoNeto);
+				}
+				//isSuma=this.isSuma(pesoNetoOld, pesoNeto);
 				if(pesoNetoOld!=null) {
 					differencia= Math.abs(pesoNeto-pesoNetoOld);
 				}
+				jsonResponse=this.confDespachoSapClientAdapter.sendConfirmacionDespacho(req.getClaveSilo(),
+						req.getClaveMaterial(), req.getNumPedidoTraslado(), req.getTipoMovimiento(), req.getNumBoleta(),
+						pesoNetoOldSinModified.toString(), req.getClaveDestino(), "");
+			}else {
+				jsonResponse = this.confDespachoSapClientAdapter.sendConfirmacionDespacho(req.getClaveSilo(),
+						req.getClaveMaterial(), req.getNumPedidoTraslado(), req.getTipoMovimiento(), req.getNumBoleta(),
+						pesoNeto.toString(), req.getClaveDestino(), "");
 			}
-			String jsonResponse = this.confDespachoSapClientAdapter.sendConfirmacionDespacho(req.getClaveSilo(),
-					req.getClaveMaterial(), req.getNumPedidoTraslado(), req.getTipoMovimiento(), req.getNumBoleta(),
-					pesoNeto.toString(), req.getClaveDestino(), "");
 			if (jsonResponse != null) {
 				ObjectMapper mapper = new ObjectMapper();
 				SapResponse responseObj = mapper.readValue(jsonResponse, SapResponse.class);
@@ -199,5 +211,72 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 	@Override
 	public Float findCantidadPromediotrasporte(Integer siloId) {
 		return this.confDespachoJdbcRepository.findPromedioPesoNetoConfDespacho();
+	}
+
+	@Override
+	public List<ConfirmDespachoResponse> findAllConfirmacionDespacho(String silo, String material, String fechaInicio,
+			String fechaFin) {
+		return this.confDespachoJdbcRepository.findAllConfirmacionesDespacho(silo,material,fechaInicio,fechaFin);
+	}
+
+	@Override
+	public ConfirmacionDespachoResponse delete(ConfirmacionDespachoRequest req) {
+		ConfirmacionDespachoResponse response = new ConfirmacionDespachoResponse();
+		try {
+			Float pesoNetoOld = 0.0f;
+			String jsonResponse="";
+			pesoNetoOld=this.confDespachoJdbcRepository.findPesoNetoByIdPedtraslado(req.getIdconfDespacho());
+			if(pesoNetoOld==null) {
+				return response;
+			}
+			jsonResponse=this.confDespachoSapClientAdapter.sendConfirmacionDespacho(req.getClaveSilo(),
+						req.getClaveMaterial(), req.getNumPedidoTraslado(), req.getTipoMovimiento(), req.getNumBoleta(),
+						pesoNetoOld.toString(), req.getClaveDestino(), "");
+			if (jsonResponse != null) {
+				ObjectMapper mapper = new ObjectMapper();
+				SapResponse responseObj = mapper.readValue(jsonResponse, SapResponse.class);
+				String codeResponse = responseObj.getT_RETURN().get(0).getType();
+				String numeroSap = String.valueOf(responseObj.getT_RETURN().get(0).getMessage_V1());
+				String mensajeSap = responseObj.getT_RETURN().get(0).getMessage();
+				response.setCode(codeResponse);
+				response.setNumeroSap(numeroSap);
+				response.setMensaje(mensajeSap);
+				if (codeResponse.equals("S")) {
+					//int eliminado=1;
+					int eliminado=this.confDespachoJdbcRepository.deleteById(req.getIdconfDespacho());
+					if (eliminado!=0) {
+						pedidoTrasladoJdbcRepository.sumaCantidadPedTraslado(pesoNetoOld, req.getNumPedidoTraslado(), 1);
+						/*if(!isSuma) {
+							pedidoTrasladoJdbcRepository.sumaCantidadPedTraslado(pesoNetoOld, req.getNumPedidoTraslado(), 1);
+							this.catalogJdbcRepository.restaCantidadStockSilo(pesoNetoOld,req.getClaveSilo(),-1);
+						}else {
+							pedidoTrasladoJdbcRepository.restaCantidadPedTraslado(pesoNetoOld, req.getNumPedidoTraslado(), 1);
+							this.catalogJdbcRepository.sumaCantidadStockSilo(pesoNetoOld,req.getClaveSilo(),-1);
+						}*/
+					}else {
+						response.setCode("-1");
+						response.setMensaje("Hubo un error al eliminar la confirmacion despacho");
+					}
+				}else {
+					response.setCode("-1");
+					response.setId("");
+					response.setMensaje("Error al eliminar la confirmacion despacho");
+				}
+				return response;
+			}
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			response.setCode("ERRO-C-001");
+			response.setNumeroSap("");
+			response.setMensaje(e.getMessage());
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			response.setCode("ERRO-C-002");
+			response.setNumeroSap("");
+			response.setMensaje(e.getMessage());
+		}
+		return response;
 	}
 }

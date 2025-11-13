@@ -10,9 +10,6 @@ import org.springframework.stereotype.Component;
 import com.bachoco.persistence.entity.CategoriaEntity;
 import com.bachoco.persistence.repository.CategoriaJpaRepository;
 
-
-
-
 @Component
 public class DatosInicialesCategoriaRunner implements CommandLineRunner {
 

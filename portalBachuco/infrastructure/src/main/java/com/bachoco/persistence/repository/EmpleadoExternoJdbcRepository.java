@@ -154,7 +154,7 @@ public class EmpleadoExternoJdbcRepository {
 		                        "p_nombre", request.getNombre(),
 		                        "p_rfc", request.getRfc(),
 		                        "p_correo", request.getCorreo(),
-		                        "p_usuario", request.getUsuario(),
+		                        "p_usuario", request.getCorreo(),
 		                        "p_silo_id", request.getSiloId()
 		                )
 		        );

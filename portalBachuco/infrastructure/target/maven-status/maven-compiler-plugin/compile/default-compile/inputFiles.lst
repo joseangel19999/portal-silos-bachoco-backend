@@ -26,8 +26,10 @@ C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagon
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\entity\CategoriaEntity.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\dto\BodegaRequestDto.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\dto\pedTraslado\dto\SapItem.java
+C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\utils\UtileriaComparators.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\mapper\rowMapper\PedTrasladoCantDisponibleRowMapper.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\adapter\ReporteDespachoRepositoryAdapter.java
+C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\service\ActualizacionTrasladosService.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\controller\scheduler\OtpCleanupScheduler.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\entity\PedidoCompraEntity.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\repository\PedidoCompraJpaRepository.java
@@ -78,6 +80,7 @@ C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagon
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\repository\UsuarioJpaRepository.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\controller\SiloController.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\adapter\PedidoCompraJdbcRepositoryAdapter.java
+C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\config\ExternalConfig.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\dto\UsuarioUpdatePasswordRequest.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\dto\sap\confDespacho\TReturn.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\controller\PlantaController.java
@@ -104,6 +107,7 @@ C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagon
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\dto\OtpRequest.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\dto\MaterialRequestDTO.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\dto\SiloRequestDto.java
+C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\config\ConfigValidator.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\controller\AutenticationController.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\adapter\OtpJpaAdapter.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\security\filter\JwtAuthenticationFilter.java
@@ -147,6 +151,7 @@ C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagon
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\config\CorsConfig.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\mapper\PedidoSapClientMapper.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\entity\EmpleadoExternoEntity.java
+C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\utils\ComparadorTrasladosSAP.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\persistence\repository\ProgramArriboJdbcRepository.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\security\CustomUserDetailsService.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\infrastructure\src\main\java\com\bachoco\dto\PedidoSapResponseClientDTO.java

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.bachoco.dto.PedidoCompraSapClientWrapper;
+import com.bachoco.exception.SapConnectionException;
 import com.bachoco.mapper.PedidoSapClientMapper;
 import com.bachoco.model.PedidoSapResponseDTO;
 import com.bachoco.persistence.config.HttpUrlConnectionClient;
@@ -36,10 +37,10 @@ public class PedidoCompraSapWebClientAdapter implements PedidoCompraSapPort {
 	public List<PedidoSapResponseDTO> findAllPedidoCompra(String claveSilo, String claveMaterial,String fechaInicio, String fechaFin,String rutaUrl) {
 		List<PedidoSapResponseDTO> response= new ArrayList<>();
 		String endpoint;
+		logger.info("===============PEDIDO COMPRA====================== ");
+		logger.info("URL::: "+rutaUrl);
 		HttpUrlConnectionClient client=new HttpUrlConnectionClient(rutaUrl,
-				sapProperties.getUsername(),sapProperties.getPassword());
-		 //String endpoint = String.format("/consulta-pedido-compra?Silo=%s&FechaIni=%s&FechaFin=%s&Material=%s",claveSilo,fechaInicio,fechaFin,Integer.parseInt(claveMaterial));
-		//String endpoint=WebClientUtils.buildUrlPedioTraslado(claveSilo, fechaInicio, fechaFin, claveMaterial, true); 
+				sapProperties.getUserName(),sapProperties.getPassWord());
 		if(filtersiloSilo==1) {
 			endpoint=WebClientUtils.buildUrlPedidoCompra(claveSilo, "", "", "", false); 
 		}else {
@@ -60,13 +61,10 @@ public class PedidoCompraSapWebClientAdapter implements PedidoCompraSapPort {
 				 return wrapper.getItems().stream().map(p->PedidoSapClientMapper.toDomain(p)).toList();
 			}
 			return response;
-		}
-		 catch (InvalidFormatException e) {
-			 logger.error("Hubo un error de conexion a sap de pedido compra: "+e.getMessage());
-			return response;
 		}catch (IOException e) {
+			e.printStackTrace();
 			logger.error("Hubo un error de conexion a sap de pedido compra: "+e.getMessage());
-			return response;
+			throw new SapConnectionException("Hubo error en conexion a SAP: "+e.getCause());
 		}
 	}
 }

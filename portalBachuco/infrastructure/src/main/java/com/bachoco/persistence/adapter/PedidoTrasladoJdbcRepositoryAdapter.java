@@ -27,6 +27,7 @@ import com.bachoco.persistence.repository.PedidoTrasladoJdbcRepository;
 import com.bachoco.persistence.repository.PlantaJpaRepository;
 import com.bachoco.port.PedidoTrasladoJdbcRepositoryPort;
 import com.bachoco.secutiry.utils.BatchUtils;
+import com.bachoco.service.ActualizacionTrasladosService;
 
 @Repository
 public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRepositoryPort {
@@ -36,51 +37,67 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 	private final CatalogJdbcRepository catalogJdbcRepository;
 	private final PlantaJpaRepository plantaJpaRepository;
 	private final MateriaJpalRepository materiaJpalRepository;
+	private final ActualizacionTrasladosService actualizacionTrasladosService;
 	private final SapProperties sapProperties;
 	
 
 	public PedidoTrasladoJdbcRepositoryAdapter(PedidoTrasladoJdbcRepository pedidoTrasladoJdbcRepository,
 			PedidoTrasladoSapWebClientoAdapter pedidoTrasladoSapWebClientoAdapter,
 			CatalogJdbcRepository catalogJdbcRepository, PlantaJpaRepository plantaJpaRepository,
-			MateriaJpalRepository materiaJpalRepository, SapProperties sapProperties) {
+			MateriaJpalRepository materiaJpalRepository, SapProperties sapProperties,
+			ActualizacionTrasladosService actualizacionTrasladosService) {
 		this.pedidoTrasladoJdbcRepository = pedidoTrasladoJdbcRepository;
 		this.pedidoTrasladoSapWebClientoAdapter = pedidoTrasladoSapWebClientoAdapter;
 		this.catalogJdbcRepository = catalogJdbcRepository;
 		this.plantaJpaRepository = plantaJpaRepository;
 		this.materiaJpalRepository = materiaJpalRepository;
 		this.sapProperties = sapProperties;
+		this.actualizacionTrasladosService=actualizacionTrasladosService;
 	}
 
 	@Override
 	public List<PedidoTrasladoDTO> findByFilterSiloAndMaterialAnFecha(String claveSilo,String claveMaterial,
-			String fechaInicio, String fechaFin) {
+			String plantaDestino,String fechaInicio, String fechaFin) {
 		List<PedidoTrasladoDTO> response=new ArrayList<>();
 		List<String> foliosExists=new ArrayList<>();
-		List<String> materialesSap=new ArrayList();
-		List<String> plantasDestino=new ArrayList();
-		List<String> pedidoCompras=new ArrayList();
+		List<String> materialesSap=new ArrayList<String>();
+		List<String> plantasDestino=new ArrayList<String>();
+		List<String> pedidoCompras=new ArrayList<String>();
 		List<PedidoTrasladoSapResponseDTO> pedidosTrasladoSap= new ArrayList<>();
 		try {
-			List<PedidoTrasladoSapResponseDTO> pedCompraSap=this.pedidoTrasladoSapWebClientoAdapter.findAllPedTraslado(claveSilo,claveMaterial,toReplace(fechaInicio),toReplace(fechaFin),sapProperties.getUrl());
+			List<PedidoTrasladoSapResponseDTO> pedCompraSap=this.pedidoTrasladoSapWebClientoAdapter.findAllPedTraslado(claveSilo,claveMaterial,plantaDestino,toReplace(fechaInicio),toReplace(fechaFin),sapProperties.getUrl());
 			List<PedidoTrasladoSapResponseDTO> pedidosSap = new ArrayList<>(pedCompraSap);
+			
+			//validacion que existan las plantas que viene en los pedido traslado
 			plantasDestino=pedidosSap.stream().map(pedido->pedido.getPlantaDestino())
 					.filter(planta -> planta != null && !planta.trim().isEmpty())
 					.collect(Collectors.toList());
-			
-			String resultValidacionPlantas=this.validateExistePlantaDestino(plantasDestino);
+
+			/*String resultValidacionPlantas=this.validateExistePlantaDestino(plantasDestino);
 			if(!resultValidacionPlantas.equals("")) {
 				throw  new NotFoundPlantaDestinoException(resultValidacionPlantas);
-			}//
-			
+			}*/
+			if(plantaDestino.trim().length()!=0) {
+				pedidosSap.removeIf(pedidoC -> !pedidoC.getPlantaDestino().equals(plantaDestino.trim()));
+			}else {
+				Set<String> plantasNoexist=this.validateExistePlantaDestinoSet(plantasDestino);
+				if(plantasNoexist.size()>0) {
+					for (String elemento : plantasNoexist) {
+					    System.out.println(elemento);
+						pedidosSap.removeIf(pedidoC -> plantasNoexist.contains(pedidoC.getPlantaDestino()));
+					}
+				}
+			}
+			//validacion que existan las plantas que viene en los pedido traslado
 			materialesSap=pedidosSap.stream().map(pedido->pedido.getMaterial())
 					.filter(material -> material != null && !material.trim().isEmpty())
 					.collect(Collectors.toList());
-			
 			String resultValidacionMateriales=this.validateExisteMateriales(materialesSap);
 			if(!resultValidacionMateriales.equals("")) {
 				throw  new NotFoundMaterialException(resultValidacionMateriales);
 			}
 			
+			//validacion que existan los pedido traslado que este asociado a pedido compra
 			pedidoCompras = pedidosSap.stream()
 				    .map(pedido -> {
 				        String posicion = pedido.getPosicion();
@@ -94,6 +111,7 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 				    .collect(Collectors.toList());
 			List<String> resultValidacionPedidoCompras=this.validateExistePedidoCompra(pedidoCompras);
 			
+			//se remueven los pedido traslado que no tienen pedido compra asociado
 			pedidosSap.removeIf(pedido -> {
 			    return pedido.getPedidoDeComprasAsociado() == null ||
 			    		pedido.getPosicion() == null;
@@ -104,10 +122,9 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 						pedidosSap.removeIf(pedidoC -> String.valueOf(pedidoC.getPedidoDeComprasAsociado()).equals(parts[0])
 								&& pedidoC.getPosicion().equals(parts[1]));
 				}
-				//String resultado= resultValidacionPedidoCompras.stream().collect(Collectors.joining(","));
-				//throw  new NotFoundPedCompraException(resultado);
 			}
 			if(pedidosSap.size()>0) {
+				actualizacionTrasladosService.procesarActualizacionTraslados(pedidosSap);
 				List<String> folios=pedidosSap.stream().map(s->s.getNumeroPedTraslado().trim().concat("-").concat(s.getPosicion().trim())).toList();
 				List<List<String>> batches = BatchUtils.partition(folios, 100);
 				for (List<String> batch : batches) {
@@ -130,7 +147,6 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 					}
 				}
 			}
-			//response= pedidoTrasladoJdbcRepository.obtenerPedidosFiltrados(claveSilo, claveMaterial,fechaInicio,fechaInicio);
 		}catch (NotFoundPlantaDestinoException ex) {
 			throw ex;
 		}catch(NotFoundMaterialException ex) {
@@ -145,11 +161,11 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 	}
 	
 	@Override
-	public void executeDowloadPedTrasladoBySap(String claveSilo, String claveMaterial, String fechaInicio,
+	public void executeDowloadPedTrasladoBySap(String claveSilo, String claveMaterial,String plantaDestino, String fechaInicio,
 			String fechaFin) {
 		List<String> foliosExists=new ArrayList<>();
 		try {
-			List<PedidoTrasladoSapResponseDTO> pedidosSap=this.pedidoTrasladoSapWebClientoAdapter.findAllPedTraslado(claveSilo,claveMaterial,toReplace(fechaInicio),toReplace(fechaFin),sapProperties.getUrl());
+			List<PedidoTrasladoSapResponseDTO> pedidosSap=this.pedidoTrasladoSapWebClientoAdapter.findAllPedTraslado(claveSilo,claveMaterial,plantaDestino,toReplace(fechaInicio),toReplace(fechaFin),sapProperties.getUrl());
 			if(pedidosSap.size()>0) {
 				List<String> folios=pedidosSap.stream().map(s->s.getNumeroPedTraslado().trim().concat("-").concat(s.getPosicion().trim())).toList();
 				List<List<String>> batches = BatchUtils.partition(folios, 100);
@@ -219,6 +235,24 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 			return "";
 		}
 	}
+
+	private Set<String> validateExistePlantaDestinoSet(List<String> plantas) {
+		// 1. Obtiene las plantas de SAP y las convierte a un Set de nombres (ya lo tienes).
+		Set<String> plantasSap = new HashSet<>(plantas);
+		// 2. Obtiene TODAS las plantas de la DB (JpaRepository)
+		List<PlantaEntity> resultDB = this.plantaJpaRepository.findAll();
+		// 3. ¡Nuevo Set! Crea un Set de NOMBRES de las plantas que ya existen en la DB.
+		// Esto es el corazón de la eficiencia para la comparación.
+		Set<String> nombresPlantaDB = resultDB.stream()
+		    .map(PlantaEntity::getPlanta)
+		    .collect(Collectors.toSet());
+		// 4. Filtra el Set de SAP para encontrar cuáles NO existen en el Set de la DB.
+		// El stream se ejecuta sobre el Set de SAP (plantasSap).
+		Set<String> plantasNoExisten = plantasSap.stream()
+		    .filter(nombre -> !nombresPlantaDB.contains(nombre))
+		    .collect(Collectors.toSet());
+		return plantasNoExisten;
+	}
 	
 	private String validateExisteMateriales(List<String> materiales) {
 		// 1. Obtiene las plantas de SAP y las convierte a un Set de nombres (ya lo tienes).
@@ -240,6 +274,24 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 		}else {
 			return "";
 		}
+	}
+	
+	private List<String> validateExisteMaterialeslIST(List<String> materiales) {
+		// 1. Obtiene las plantas de SAP y las convierte a un Set de nombres (ya lo tienes).
+		Set<String> materialesSap = new HashSet<>(materiales);
+		// 2. Obtiene TODAS las plantas de la DB (JpaRepository)
+		List<MaterialEntity> resultDB = this.materiaJpalRepository.findAll();
+		// 3. ¡Nuevo Set! Crea un Set de NOMBRES de las plantas que ya existen en la DB.
+		// Esto es el corazón de la eficiencia para la comparación.
+		Set<String> numMaterialDB = resultDB.stream()
+		    .map(MaterialEntity::getNumero)
+		    .collect(Collectors.toSet());
+		// 4. Filtra el Set de SAP para encontrar cuáles NO existen en el Set de la DB.
+		// El stream se ejecuta sobre el Set de SAP (plantasSap).
+		Set<String> materialesNoExisten = materialesSap.stream()
+		    .filter(nombre -> !numMaterialDB.contains(nombre))
+		    .collect(Collectors.toSet());
+		return new ArrayList<>(materialesNoExisten);
 	}
 	
 	private List<String> validateExistePedidoCompra(List<String> pedCompraAsociado) {

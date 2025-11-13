@@ -11,9 +11,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.bachoco.exception.SapConnectionException;
 import com.bachoco.persistence.config.SapProperties;
 import com.bachoco.port.ConfirmacionDespachoSapPort;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,6 +29,7 @@ public class ConfirmacionDespachoSapClientAdapter implements ConfirmacionDespach
 	private final SapProperties sapProperties;
 	@Value("${app.url.endpoit.sap.filter.silo}")
 	private int filtersiloSilo;
+	private static final Logger logger = LoggerFactory.getLogger(ConfirmacionDespachoSapClientAdapter.class);
 	
 	public ConfirmacionDespachoSapClientAdapter(SapProperties sapProperties) {
 		this.sapProperties = sapProperties;
@@ -56,7 +61,7 @@ public class ConfirmacionDespachoSapClientAdapter implements ConfirmacionDespach
         } catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		    return null;
+			throw new SapConnectionException("Hubo error en conexion a SAP: "+e.getCause());
 		} finally {
             conn.disconnect();
         }
@@ -67,18 +72,25 @@ public class ConfirmacionDespachoSapClientAdapter implements ConfirmacionDespach
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestMap = new HashMap<>();
 		requestMap.put("I_SILO",claveSilo);
-		requestMap.put("I_REFNODOC", "PORTAL TUKY");
-		requestMap.put("I_HEADERTXT", "PRUEBA-COSECHAS TUKY");
-		requestMap.put("I_MATERIAL",claveMaterial);
+		requestMap.put("I_REFNODOC", numBoleta);
+		requestMap.put("I_HEADERTXT", numBoleta);
+		requestMap.put("I_MATERIAL",Integer.valueOf(claveMaterial));
 		requestMap.put("I_PONUMBER",claveNumPedTraslado);
 		requestMap.put("I_CANTIDAD", pesoNeto);
 		requestMap.put("I_MOVIMIENTO",claveMovimiento);
+		logger.info("=============== TRANSACCION SAP ================");
+		logger.info("TIPO MOVIMIENTO: "+claveMovimiento);
+		logger.info("PESO NETO: "+pesoNeto);
+		logger.info("NUMERO PEDIDO TRASLADO: "+claveNumPedTraslado);
+		logger.info("SILO: "+claveSilo);
+		logger.info("MATERIAL: "+claveMaterial);
+		logger.info("===============================================");
 		return mapper.writeValueAsString(requestMap);
 	}
 	
 	 private void addBasicAuth(HttpURLConnection conn) {
 	        String encodedAuth = Base64.getEncoder()
-	                .encodeToString((sapProperties.getUsername() + ":" + sapProperties.getPassword()).getBytes(StandardCharsets.UTF_8));
+	                .encodeToString((sapProperties.getUserName() + ":" + sapProperties.getPassWord()).getBytes(StandardCharsets.UTF_8));
 	        conn.setRequestProperty("Authorization", "Basic " + encodedAuth);
 	    }
 	    // ======================

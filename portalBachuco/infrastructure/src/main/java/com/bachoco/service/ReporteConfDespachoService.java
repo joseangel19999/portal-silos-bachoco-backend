@@ -3,10 +3,12 @@ package com.bachoco.service;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
@@ -28,11 +30,15 @@ import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 
+import jakarta.servlet.ServletContext;
+
 @Service
 public class ReporteConfDespachoService {
 	
     @Autowired
     private org.thymeleaf.TemplateEngine templateEngine;
+    @Autowired
+    private ServletContext servletContext;
 	private final ConfDespachoJdbcRepository confDespachoJdbcRepository;
     
     public ReporteConfDespachoService(ConfDespachoJdbcRepository confDespachoJdbcRepository) {
@@ -144,7 +150,8 @@ public class ReporteConfDespachoService {
         boleta.setGuia(conf.getNumeroSap());
         boleta.setChofer(conf.getChofer());
         boleta.setNumeroTicketBascula(conf.getFolio());
-        boleta.setObservaciones("DESTINO BACHOCO CELAYA GTO. NO. DE PEDIDO ".concat(conf.getNumPedTraslado()));
+        boleta.setObservaciones("DESTINO: ".concat(conf.getPlantaDestino().concat(" NO. DE PEDIDO ").concat(conf.getNumPedTraslado())));
+        //boleta.setObservaciones("DESTINO BACHOCO CELAYA GTO. NO. DE PEDIDO ".concat(conf.getNumPedTraslado()));
         boleta.setPedidoTraslado(conf.getNumPedTraslado());
         boleta.setPesoBruto(Double.parseDouble(conf.getPesoBruto()));
         boleta.setTara(Double.parseDouble(conf.getPesoTara()));
@@ -153,7 +160,7 @@ public class ReporteConfDespachoService {
         return boleta;
     }
 	
-	public ByteArrayOutputStream generarPdfBoleta(Integer id) throws IOException {
+	/*public ByteArrayOutputStream generarPdfBoleta(Integer id) throws IOException {
 		ReportConfDespacho reporte= this.confDespachoJdbcRepository.findConfDespachoById(id);
         BoletaSalida boleta = obtenerDatosBoletaByQuery(reporte);
         // 1. Crear el contexto para Thymeleaf
@@ -162,12 +169,14 @@ public class ReporteConfDespachoService {
         // 2. Procesar la plantilla HTML (src/main/resources/templates/boleta-salida.html)
         String htmlContent = templateEngine.process("boleta.html", context);
        // String baseUri = this.getClass().getClassLoader().getResource("/").toString();
-        java.net.URL resourceUrl = this.getClass().getClassLoader().getResource("static");
-        if (resourceUrl == null) {
-           // Si la carpeta 'static' no se encuentra, algo está mal con la estructura del empaquetado.
-           throw new IOException("No se pudo encontrar la carpeta 'static' en el classpath.");
-        }
-        String baseUri = resourceUrl.toString();
+       // java.net.URL resourceUrl = this.getClass().getClassLoader().getResource("static");
+        
+     // 3. Obtener la ruta real del contexto web
+        //String realPath = servletContext.getRealPath("/");
+        //String baseUri = "file://" + realPath;
+        //String baseUri = resourceUrl.toString();
+        ClassPathResource staticResource = new ClassPathResource("static");
+        String baseUri = staticResource.getURL().toString();
         // 3. Convertir HTML a PDF usando OpenHTMLToPDF
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
@@ -178,5 +187,39 @@ public class ReporteConfDespachoService {
             builder.run();
             return os;
         }
-    }
+    }*/
+	
+	public ByteArrayOutputStream generarPdfBoleta(Integer id) throws IOException {
+	    ReportConfDespacho reporte = this.confDespachoJdbcRepository.findConfDespachoById(id);
+	    BoletaSalida boleta = obtenerDatosBoletaByQuery(reporte);
+	    
+	    // Convertir imagen a base64
+	    String logoBase64 = imageToBase64();
+	    
+	    Context context = new Context(new Locale("es", "MX"));
+	    context.setVariable("boleta", boleta);
+	    context.setVariable("logoBase64", logoBase64);
+	    
+	    String htmlContent = templateEngine.process("boleta.html", context);
+	    
+	    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+	        PdfRendererBuilder builder = new PdfRendererBuilder();
+	        builder.withHtmlContent(htmlContent, "");
+	        builder.toStream(os);
+	        builder.run();
+	        return os;
+	    }
+	}
+
+	private String imageToBase64() throws IOException {
+	    try (InputStream inputStream = getClass().getClassLoader()
+	            .getResourceAsStream("images/logo.png")) {
+	        if (inputStream == null) {
+	            throw new IOException("No se pudo encontrar el logo en: images/logo.png");
+	        }
+	        byte[] imageBytes = inputStream.readAllBytes();
+	        String base64 = java.util.Base64.getEncoder().encodeToString(imageBytes);
+	        return "data:image/png;base64," + base64;
+	    }
+	}
 }

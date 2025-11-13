@@ -26,11 +26,11 @@ public class ProgramArriboSapWebClientAdapter implements ProgramArriboSapReposit
 	}
 
 	@Override
-	public Double stockSilo(String claveSilo, String rutaUrl) {
+	public Double stockSilo(String claveSilo,String material, String rutaUrl) {
 		HttpUrlConnectionClient client=new HttpUrlConnectionClient(rutaUrl,
-				sapProperties.getUsername(),sapProperties.getPassword());
+				sapProperties.getUserName(),sapProperties.getPassWord());
 		 //String endpoint = String.format("/consulta-pedido-compra?Silo=%s&Param1=%s",claveSilo,"X");
-			String endpoint=WebClientUtils.buildUrlStockSilo(claveSilo,true);
+			String endpoint=WebClientUtils.buildUrlStockSilo(claveSilo,Integer.valueOf(material),true);
 		 try {
 				String jsonResponse = client.get(endpoint);
 				ObjectMapper objectMapper= new ObjectMapper();

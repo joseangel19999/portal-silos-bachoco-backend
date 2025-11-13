@@ -3,8 +3,10 @@ package com.bachoco.persistence.adapter;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
+import com.bachoco.exception.CannotDeleteResourceException;
 import com.bachoco.mapper.MaterialMapper;
 import com.bachoco.model.Material;
 import com.bachoco.persistence.entity.MaterialEntity;
@@ -40,7 +42,12 @@ public class MaterialJpaAdapter implements MaterialRepositoryPort {
 	public void delete(Integer id) {
 		Optional<MaterialEntity> opt=this.materialRepository.findByMaterialId(id);
 		if(opt.isPresent()) {
-			this.materialRepository.delete(opt.get());
+			try {
+				this.materialRepository.delete(opt.get());
+			}catch (DataIntegrityViolationException e) {
+				throw new CannotDeleteResourceException(
+		                "No se puede eliminar el producto, existen pedidos asociados.", e);
+			}
 		}
 	}
 

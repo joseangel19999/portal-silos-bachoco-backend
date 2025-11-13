@@ -20,12 +20,12 @@ public class PedidoCompraUsecase {
 		this.documentoRepositoryPort = documentoRepositoryPort;
 	}
 
-	public List<PedidoCompraDTO> findAll(String claveSilo,String claveMaterial,String fechaInicio,String fechaFin){
-		return this.pedidoCompraJdbcRepositoryPort.findByFilterSiloAndMaterialAnFecha(claveSilo, claveMaterial, fechaInicio, fechaFin);
+	public List<PedidoCompraDTO> findAll(String claveSilo,String claveMaterial,String plantaDestino,String fechaInicio,String fechaFin){
+		return this.pedidoCompraJdbcRepositoryPort.findByFilterSiloAndMaterialAnFecha(claveSilo, claveMaterial,plantaDestino, fechaInicio, fechaFin);
 	}
 	
-	public void executePedidoCompraDowloadSap(String claveSilo,String claveMaterial,String fechaInicio,String fechaFin) {
-		this.pedidoCompraJdbcRepositoryPort.executePedidoCompraByFilter(claveSilo, claveMaterial, fechaInicio, fechaFin);
+	public void executePedidoCompraDowloadSap(String claveSilo,String claveMaterial,String plantaDestino,String fechaInicio,String fechaFin) {
+		this.pedidoCompraJdbcRepositoryPort.executePedidoCompraByFilter(claveSilo, claveMaterial,plantaDestino, fechaInicio, fechaFin);
 	}
 	
 	public List<PedidoCompraDTO> findAllPedidosCompraSap(String claveSilo,String claveMaterial,Integer materialId,String fechaInicio,String fechaFin){

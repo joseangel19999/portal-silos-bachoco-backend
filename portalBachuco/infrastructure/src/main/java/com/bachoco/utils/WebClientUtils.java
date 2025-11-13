@@ -61,7 +61,7 @@ public class WebClientUtils {
 			    return uri.build().toString();
 	}
 	public static String buildUrlPedioTraslado(String silo,String fechaInicio,String fechaFin,
-			Integer material,boolean isPedidoTraslado) {
+			Integer material,String plantaDestino,boolean isPedidoTraslado) {
 		UriComponentsBuilder uri= UriComponentsBuilder.fromPath("/consulta-pedido-compra");
 				if(silo.trim().length()!=0) {
 					uri.queryParam("Silo", silo);
@@ -75,16 +75,22 @@ public class WebClientUtils {
 			    if(material.toString().length()!=0) {
 			    	uri.queryParam("Material", material);
 			    }
+			    if(plantaDestino.trim().length()!=0) {
+			    	uri.queryParam("Param2", plantaDestino);
+			    }
 			    if(isPedidoTraslado) {
 			    	uri.queryParam("Traslado", "X");
 			    }
 			    return uri.build().toString();
 	}
 	
-	public static String buildUrlStockSilo(String silo,boolean isPedidoTraslado) {
+	public static String buildUrlStockSilo(String silo,Integer material,boolean isPedidoTraslado) {
 		UriComponentsBuilder uri= UriComponentsBuilder.fromPath("/consulta-pedido-compra");
 				if(silo.trim().length()!=0) {
 					uri.queryParam("Silo", silo);
+				}
+				if(material.toString().length()!=0) {
+					uri.queryParam("Material", material);
 				}
 			    if(isPedidoTraslado) {
 			    	uri.queryParam("Param1", "X");

@@ -25,15 +25,15 @@ public class PedidoTrasladoController {
 	
 	@GetMapping("/filters")
 	public ResponseEntity<List<PedidoTrasladoDTO>> findAllByFilters(@RequestParam String claveSilo,@RequestParam String claveMaterial,
-			@RequestParam String fechaInicio,@RequestParam String fechaFin){
-		List<PedidoTrasladoDTO> response=this.pedidoTrasladoJdbcUseCase.findByFilters(claveSilo, claveMaterial, fechaInicio, fechaFin);
+			@RequestParam String plantaDestino,@RequestParam String fechaInicio,@RequestParam String fechaFin){
+		List<PedidoTrasladoDTO> response=this.pedidoTrasladoJdbcUseCase.findByFilters(claveSilo, claveMaterial,plantaDestino, fechaInicio, fechaFin);
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	
 	@GetMapping("/filters-dowload-ped-traslado")
 	public ResponseEntity<Void> findAllDowloadPedTraslado(@RequestParam String claveSilo,@RequestParam String claveMaterial,
-			@RequestParam String fechaInicio,@RequestParam String fechaFin){
-		this.pedidoTrasladoJdbcUseCase.executeDowloadPedTrasladoBySap(claveSilo, claveMaterial, fechaInicio, fechaFin);
+			@RequestParam String plantaDestino,@RequestParam String fechaInicio,@RequestParam String fechaFin){
+		this.pedidoTrasladoJdbcUseCase.executeDowloadPedTrasladoBySap(claveSilo, claveMaterial,plantaDestino, fechaInicio, fechaFin);
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 	

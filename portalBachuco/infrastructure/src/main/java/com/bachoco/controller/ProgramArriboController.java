@@ -30,9 +30,9 @@ public class ProgramArriboController {
 		this.pedidoTrasladoJdbcUseCase = pedidoTrasladoJdbcUseCase;
 	}
 
-	@GetMapping("/{claveSilo}")
-	public ResponseEntity<String> saveProgramArivo(@PathVariable String claveSilo) {
-		Double response=this.programArriboUseCase.stockSilo(claveSilo);
+	@GetMapping("/{claveSilo}/{material}")
+	public ResponseEntity<String> saveProgramArivo(@PathVariable String claveSilo,@PathVariable String material) {
+		Double response=this.programArriboUseCase.stockSilo(claveSilo,material);
 		return new ResponseEntity<String>(String.valueOf(response),HttpStatus.OK);
 	}
 	

@@ -3,6 +3,7 @@ package com.bachoco.controller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.List;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bachoco.model.ConfDespachoPesosRequest;
+import com.bachoco.model.ConfirmDespachoResponse;
 import com.bachoco.model.ConfirmacionDespachoRequest;
 import com.bachoco.model.ConfirmacionDespachoResponse;
 import com.bachoco.service.ReporteConfDespachoService;
@@ -55,7 +58,13 @@ public class ConfirmacionDespachoController {
 		ConfirmacionDespachoResponse response =this.confirmacionDespachoUseCase.updateSinSap(req);
 		return new ResponseEntity<ConfirmacionDespachoResponse>(response,HttpStatus.OK);
 	}
-	
+
+	@GetMapping("/filter-list-conf-despacho")
+	public ResponseEntity<List<ConfirmDespachoResponse>> findAllConfirmacionDespacho(@RequestParam String silo,
+			@RequestParam String material,@RequestParam String fechaInicio,@RequestParam String fechaFin){
+		List<ConfirmDespachoResponse>  response =this.confirmacionDespachoUseCase.findAllConfirmacionDespacho(silo,material,fechaInicio,fechaFin);
+		return new ResponseEntity<List<ConfirmDespachoResponse>> (response,HttpStatus.OK);
+	}
 	@GetMapping("/filters-pesos")
 	public ResponseEntity<ConfirmacionDespachoResponse> validatePesos(@RequestParam Integer id,
 			@RequestParam Float pesobruto,@RequestParam Float pesotara){
@@ -92,4 +101,10 @@ public class ConfirmacionDespachoController {
             return ResponseEntity.badRequest().build();
         }
     }
+	
+	@PostMapping("/delete")
+	public ResponseEntity<ConfirmacionDespachoResponse> delete(@RequestBody ConfirmacionDespachoRequest req){
+		ConfirmacionDespachoResponse response =this.confirmacionDespachoUseCase.delete(req);
+		return new ResponseEntity<ConfirmacionDespachoResponse>(response,HttpStatus.OK);
+	}
 }

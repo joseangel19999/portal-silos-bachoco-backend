@@ -1,5 +1,7 @@
 package com.bachoco.persistence.repository;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +9,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
@@ -15,6 +18,7 @@ import com.bachoco.mapper.rowMapper.PedidoCompraRowMapper;
 import com.bachoco.model.PedidoCompraSapDTO;
 import com.bachoco.model.PedidoSapResponseDTO;
 import com.bachoco.model.procedores.PedidoCompraDTO;
+import com.bachoco.utils.UtileriaComparators;
 
 @Repository
 public class PedidoCompraJdbcRepository {
@@ -25,8 +29,6 @@ public class PedidoCompraJdbcRepository {
 	private final DataSource dataSource;
 	private final PedidoCompraRowMapper pedidoCompraRowMapper;
 
-
-	
 	public PedidoCompraJdbcRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate,
 			DataSource dataSource, PedidoCompraRowMapper pedidoCompraRowMapper) {
 		this.jdbcTemplate = jdbcTemplate;
@@ -54,81 +56,349 @@ public class PedidoCompraJdbcRepository {
 
 	public List<PedidoCompraDTO> findAllByFolioNumCompra(List<String> folios) {
 		String sql = """
-				  SELECT
-					pc.PEDIDO_COMPRA_ID,
-			        pc.NUMERO_PEDIDO,
-			        pc.POSICION,
-			        pc.CANTIDAD_PEDIDA,
-			        dtpc.CANTIDAD_ENTREGADA,
-			        dtpc.CANTIDAD_DESPACHADA,
-			        dtpc.CANTIDAD_PENDIENTE_DESPACHO,
-			        pc.CONTRATO_LEGAL,
-			        pc.URL_CER_CONSERVACION,
-			        pc.CER_DEPOSITO,
-			        pc.TIPO_EXTENCION
-			    FROM
-			        tc_pedido_compra pc
-			    JOIN
-			        tc_detalle_pedido_compra dtpc ON dtpc.TC_PEDIDO_COMPRA_ID = pc.PEDIDO_COMPRA_ID
-			    WHERE
-			        pc.FOLIO_NUM_PED_POSICION in (:folios)
-				    """;
+				 SELECT
+				pc.PEDIDO_COMPRA_ID,
+				      pc.NUMERO_PEDIDO,
+				      pc.POSICION,
+				      pc.CANTIDAD_PEDIDA,
+				      dtpc.CANTIDAD_ENTREGADA,
+				      dtpc.CANTIDAD_DESPACHADA,
+				      dtpc.CANTIDAD_PENDIENTE_DESPACHO,
+				      pc.CONTRATO_LEGAL,
+				      pc.URL_CER_CONSERVACION,
+				      pc.CER_DEPOSITO,
+				      pc.TIPO_EXTENCION
+				  FROM
+				      tc_pedido_compra pc
+				  JOIN
+				      tc_detalle_pedido_compra dtpc ON dtpc.TC_PEDIDO_COMPRA_ID = pc.PEDIDO_COMPRA_ID
+				  WHERE
+				      pc.FOLIO_NUM_PED_POSICION in (:folios)
+				   """;
 
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("folios", folios);
-	    return namedParameterJdbcTemplate.query(sql, params,pedidoCompraRowMapper);
+		Map<String, Object> params = new HashMap<>();
+		params.put("folios", folios);
+		return namedParameterJdbcTemplate.query(sql, params, pedidoCompraRowMapper);
 	}
-	
+
 	public List<String> findAllFoliosExist(List<String> folios) {
 		String sql = """
-				   SELECT pc.FOLIO_NUM_PED_POSICION
-		            FROM tc_pedido_compra pc
-		            WHERE pc.FOLIO_NUM_PED_POSICION IN (:folios)
+				SELECT
+					pc.FOLIO_NUM_PED_POSICION,
+				       dtpc.CANTIDAD_DESPACHADA,
+				       dtpc.CANTIDAD_PENDIENTE_DESPACHO
+				   FROM
+				       tc_pedido_compra pc
+				   JOIN
+				       tc_detalle_pedido_compra dtpc ON dtpc.TC_PEDIDO_COMPRA_ID = pc.PEDIDO_COMPRA_ID
+				                where
+				                pc.FOLIO_NUM_PED_POSICION in (:folios)
 				    """;
 
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("folios", folios);
-		 return namedParameterJdbcTemplate.query(
-		            sql,
-		            params,
-		            (rs, rowNum) -> rs.getString("FOLIO_NUM_PED_POSICION")
-		        );
+		Map<String, Object> params = new HashMap<>();
+		params.put("folios", folios);
+		return namedParameterJdbcTemplate.query(sql, params, (rs, rowNum) -> rs.getString("FOLIO_NUM_PED_POSICION"));
 	}
-	
+
+	public List<Map<String, Object>> findAllFoliosExistCantidades(List<String> folios) {
+		String sql = """
+				SELECT
+				    pc.FOLIO_NUM_PED_POSICION,
+				    pc.CANTIDAD_PEDIDA,
+				    dtpc.CANTIDAD_DESPACHADA,
+				    dtpc.CANTIDAD_PENDIENTE_DESPACHO,
+				    dtpc.CANTIDAD_ENTREGADA
+				FROM
+				    tc_pedido_compra pc
+				JOIN
+				    tc_detalle_pedido_compra dtpc ON dtpc.TC_PEDIDO_COMPRA_ID = pc.PEDIDO_COMPRA_ID
+				WHERE
+				    pc.FOLIO_NUM_PED_POSICION in (:folios)
+				""";
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("folios", folios);
+
+		return namedParameterJdbcTemplate.query(sql, params, (rs, rowNum) -> {
+			Map<String, Object> row = new HashMap<>();
+			row.put("folio", rs.getString("FOLIO_NUM_PED_POSICION"));
+			row.put("cantidadPedida", rs.getBigDecimal("CANTIDAD_PEDIDA"));
+			row.put("cantidadDespachada", rs.getBigDecimal("CANTIDAD_DESPACHADA"));
+			row.put("cantidadPendienteDespacho", rs.getBigDecimal("CANTIDAD_PENDIENTE_DESPACHO"));
+			row.put("cantidadEntregada", rs.getBigDecimal("CANTIDAD_ENTREGADA"));
+			return row;
+		});
+	}
+
+	public List<String> findAllFoliosExistWithped(List<String> folios) {
+		String sql = """
+				SELECT pc.FOLIO_NUM_PED_POSICION, dtpc.CANTIDAD_DESPACHADA,
+				       FROM tc_pedido_compra pc
+				       WHERE pc.FOLIO_NUM_PED_POSICION IN (:folios)
+				 """;
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("folios", folios);
+		return namedParameterJdbcTemplate.query(sql, params, (rs, rowNum) -> rs.getString("FOLIO_NUM_PED_POSICION"));
+	}
+
 	public List<String> findAllNumeroCompraByFilterProgram(String claveSilo, Integer materialId) {
 		String sql = """
 				select CONCAT(p.NUMERO_PEDIDO,'-',p.POSICION) AS FOLIO_PED_COMPRA
 				from tc_pedido_compra p
-                inner join tc_detalle_pedido_compra pc on p.PEDIDO_COMPRA_ID= pc.TC_PEDIDO_COMPRA_ID
-                inner join tc_silo s on p.TC_SILO_ID= s.SILO_ID
-                where s.SILO_NOMBRE=?
+				            inner join tc_detalle_pedido_compra pc on p.PEDIDO_COMPRA_ID= pc.TC_PEDIDO_COMPRA_ID
+				            inner join tc_silo s on p.TC_SILO_ID= s.SILO_ID
+				            where s.SILO_NOMBRE=?
 				    """;
-		return jdbcTemplate.query(sql, new Object[] { claveSilo },
-				(rs, rowNum) -> rs.getString("FOLIO_PED_COMPRA"));
+		return jdbcTemplate.query(sql, new Object[] { claveSilo }, (rs, rowNum) -> rs.getString("FOLIO_PED_COMPRA"));
 	}
 
-	public void savePedidoCompra(List<PedidoSapResponseDTO> pedido) {
+	public void savePedidoCompra(List<PedidoSapResponseDTO> pedido,String silo) {
 		this.simpleJdbcCall = new SimpleJdbcCall(dataSource).withProcedureName("sp_insert_compra_venta");
 		for (PedidoSapResponseDTO p : pedido) {
 			Map<String, Object> params = new HashMap<>();
 			params.put("p_numero_ped_compra", p.getPedCompra());
-			params.put("p_cantidad_pedida", p.getCantidadPedido()!=null?p.getCantidadPedido():0);
-			params.put("p_cantidad_entregada", p.getCantidadEntrega()!=null?p.getCantidadEntrega():0);
-			params.put("p_cantidad_despachada",p.getCantidadDespacho()!=null?p.getCantidadDespacho():0);
+			params.put("p_cantidad_pedida", p.getCantidadPedido() != null ? p.getCantidadPedido() : 0);
+			params.put("p_cantidad_entregada", p.getCantidadEntrega() != null ? p.getCantidadEntrega() : 0);
+			params.put("p_cantidad_despachada", p.getCantidadDespacho() != null ? p.getCantidadDespacho() : 0);
 			params.put("p_cantidad_pend_despacho", p.getCantidadPendienteDespacho());
-			params.put("p_clave_material",p.getMaterial());
-			params.put("p_posicion",p.getPosicion());
-			params.put("p_contrato_legal",p.getContratoLegal());
+			params.put("p_clave_material", p.getMaterial());
+			params.put("p_posicion", p.getPosicion());
+			params.put("p_contrato_legal", p.getContratoLegal());
 			params.put("p_cert_deposito", "");
 			params.put("p_silo", "CP12");
 			params.put("p_material", "");
 			params.put("p_planta_recep", p.getPlantaReceptor());
 			try {
 				simpleJdbcCall.execute(params);
+				this.asignacionSiloAndMaterial(silo, p.getMaterial(), p.getPedCompra(), p.getPosicion());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
 	}
+	
+	private void asignacionSiloAndMaterial(String silo,String material,String pedCompra,String posicion) {
+		String folio=pedCompra.concat("-").concat(posicion);
+		this.procesarCompraVentaOptimizado(folio, silo, material);
+	}
+	
+	public int procesarCompraVentaOptimizado(String folio,String silo,String material) {
+	    // Consulta única para obtener ambos IDs
+	    String queryIds = """
+	        SELECT mat.MATERIAL_ID, s.SILO_ID 
+	        FROM tc_material mat 
+	        CROSS JOIN tc_silo s 
+	        WHERE mat.NUMERO_MATERIAL = ? 
+	        AND s.SILO_CLAVE = ?
+	        LIMIT 1
+	        """;
+	    
+	    Map<String, Integer> ids = jdbcTemplate.query(queryIds, rs -> {
+	        Map<String, Integer> result = new HashMap<>();
+	        if (rs.next()) {
+	            result.put("materialId", rs.getInt("MATERIAL_ID"));
+	            result.put("siloId", rs.getInt("SILO_ID"));
+	        }
+	        return result;
+	    }, material,silo);
+	    
+	    if (ids == null || ids.isEmpty()) {
+	        throw new RuntimeException("Material o Silo no encontrado");
+	    }
+	    
+	    Integer materialId = ids.get("materialId");
+	    Integer siloId = ids.get("siloId");
+	    return this.actualizarPedidoCompra(folio, siloId, materialId);
+	}
+	
+	public int actualizarPedidoCompra( String folio,Integer idSilo, Integer idMaterial) {
+        String sql = """
+            UPDATE tc_pedido_compra 
+            SET TC_SILO_ID = ?, 
+                TC_MATERIAL_ID = ?
+            WHERE FOLIO_NUM_PED_POSICION = ?
+            """;
+        return jdbcTemplate.update(sql, idSilo, idMaterial, folio);
+    }
+
+	public void UpdateCaPedidoCompra(PedidoSapResponseDTO p) {
+		this.simpleJdbcCall = new SimpleJdbcCall(dataSource).withProcedureName("sp_insert_compra_venta");
+		Map<String, Object> params = new HashMap<>();
+		params.put("p_numero_ped_compra", p.getPedCompra());
+		params.put("p_cantidad_pedida", p.getCantidadPedido() != null ? p.getCantidadPedido() : 0);
+		params.put("p_cantidad_entregada", p.getCantidadEntrega() != null ? p.getCantidadEntrega() : 0);
+		params.put("p_cantidad_despachada", p.getCantidadDespacho() != null ? p.getCantidadDespacho() : 0);
+		params.put("p_cantidad_pend_despacho", p.getCantidadPendienteDespacho());
+		params.put("p_clave_material", p.getMaterial());
+		params.put("p_posicion", p.getPosicion());
+		params.put("p_contrato_legal", p.getContratoLegal());
+		params.put("p_cert_deposito", "");
+		params.put("p_silo", "CP12");
+		params.put("p_material", "");
+		params.put("p_planta_recep", p.getPlantaReceptor());
+		try {
+			simpleJdbcCall.execute(params);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public int actualizarPedidoCompraCompleto(String folio, Float cantidadPedida, Float cantidadEntregada,
+			Float cantidadDespachada, Float cantidadPendienteDespacho) {
+
+		String sql = """
+				UPDATE tc_pedido_compra pc
+				JOIN tc_detalle_pedido_compra dtpc ON dtpc.TC_PEDIDO_COMPRA_ID = pc.PEDIDO_COMPRA_ID
+				SET pc.CANTIDAD_PEDIDA = :cantidadPedida,
+				dtpc.CANTIDAD_ENTREGADA = :cantidadEntregada,
+				dtpc.CANTIDAD_DESPACHADA = :cantidadDespachada,
+				dtpc.CANTIDAD_PENDIENTE_DESPACHO = :cantidadPendienteDespacho
+				WHERE pc.FOLIO_NUM_PED_POSICION = :folio
+				""";
+		Map<String, Object> params = new HashMap<>();
+		params.put("folio", folio);
+		params.put("cantidadPedida", cantidadPedida);
+		params.put("cantidadEntregada", cantidadEntregada);
+		params.put("cantidadDespachada", cantidadDespachada);
+		params.put("cantidadPendienteDespacho", cantidadPendienteDespacho);
+		try {
+			return namedParameterJdbcTemplate.update(sql, params);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+	
+	public int actualizarCantidadEntregada(String folio, Float cantidadPedida, Float cantidadEntregada,
+			Float cantidadDespachada, Float cantidadPendienteDespacho) {
+
+		String sql = """
+				UPDATE tc_pedido_compra pc
+				JOIN tc_detalle_pedido_compra dtpc ON dtpc.TC_PEDIDO_COMPRA_ID = pc.PEDIDO_COMPRA_ID
+				SET pc.CANTIDAD_PEDIDA = :cantidadPedida,
+				dtpc.CANTIDAD_ENTREGADA = :cantidadEntregada,
+				dtpc.CANTIDAD_DESPACHADA = :cantidadDespachada,
+				dtpc.CANTIDAD_PENDIENTE_DESPACHO = :cantidadPendienteDespacho
+				WHERE pc.FOLIO_NUM_PED_POSICION = :folio
+				""";
+		Map<String, Object> params = new HashMap<>();
+		params.put("folio", folio);
+		params.put("cantidadPedida", cantidadPedida);
+		params.put("cantidadEntregada", cantidadEntregada);
+		params.put("cantidadDespachada", cantidadDespachada);
+		params.put("cantidadPendienteDespacho", cantidadPendienteDespacho);
+		try {
+			return namedParameterJdbcTemplate.update(sql, params);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+	
+	private void ejecutarActualizacionPorLotes(List<MapSqlParameterSource> batchParams) {
+	    String sql = """
+	        UPDATE tc_pedido_compra pc
+	        JOIN tc_detalle_pedido_compra dtpc ON dtpc.TC_PEDIDO_COMPRA_ID = pc.PEDIDO_COMPRA_ID
+	        SET pc.CANTIDAD_PEDIDA = :cantidadPedida,
+	            dtpc.CANTIDAD_ENTREGADA = :cantidadEntregada,
+	            dtpc.CANTIDAD_DESPACHADA = :cantidadDespachada,
+	            dtpc.CANTIDAD_PENDIENTE_DESPACHO = :cantidadPendienteDespacho
+	        WHERE pc.FOLIO_NUM_PED_POSICION = :folio
+	        """;
+	    
+	    namedParameterJdbcTemplate.batchUpdate(sql, batchParams.toArray(new MapSqlParameterSource[0]));
+	}
+	
+	public void updateCantidades(List<PedidoSapResponseDTO> updateCompras, Map<String, Map<String, Object>> folioMap) {
+	    List<MapSqlParameterSource> batchParams = new ArrayList();
+	    for (PedidoSapResponseDTO ped : updateCompras) {
+	        if (ped.getPedCompra() != null && ped.getPosicion() != null) {
+	            String folio = UtileriaComparators.buildFolioPedCompraAnPosicion(ped.getPedCompra(), ped.getPosicion());
+	            Map<String, Object> datos = folioMap.get(folio);
+	            boolean isCambio=tieneCambios(datos, ped);
+	            if (datos != null && !isCambio) {
+	                MapSqlParameterSource params = new MapSqlParameterSource();
+	                params.addValue("cantidadPedida", UtileriaComparators.parseFloatSafe(ped.getCantidadPedido()));
+	                params.addValue("cantidadEntregada", UtileriaComparators.parseFloatSafe(ped.getCantidadEntrega()));
+	                params.addValue("cantidadDespachada", UtileriaComparators.parseFloatSafe(ped.getCantidadDespacho()));
+	                params.addValue("cantidadPendienteDespacho",UtileriaComparators.parseFloatSafe(ped.getCantidadPendienteDespacho()));
+	                params.addValue("folio", folio);
+	                
+	                batchParams.add(params);
+	            }
+	        }
+	    }
+	    if (!batchParams.isEmpty()) {
+	        ejecutarActualizacionPorLotes(batchParams);
+	    }
+	}
+	private boolean tieneCambios(Map<String, Object> datosBD, PedidoSapResponseDTO pedSAP) {
+	    try {
+	        // Comparar todos los campos relevantes
+	        Float despachadaBD =0.0F;
+	        Float pendienteDespachoBD =0.0F;
+	        Float despachadaSAP=0.0F;
+	        Float pendienteDespachoSAP=0.0F;
+	        Float pedidaBD=0.0F;
+	        Float pedidaSAP=0.0F;
+	        Float entregadaBD=0.0F;
+	        Float entregadaSAP=0.0F;
+	        if(datosBD.get("cantidadDespachada")!=null) {
+	        	despachadaBD=Float.parseFloat( datosBD.get("cantidadDespachada").toString());
+	        }
+	        if(datosBD.get("cantidadPendienteDespacho")!=null) {
+	        	pendienteDespachoBD=Float.parseFloat(datosBD.get("cantidadPendienteDespacho").toString());
+	        }
+	        if(pedSAP.getCantidadDespacho()!=null) {
+	        	despachadaSAP =Float.parseFloat(pedSAP.getCantidadDespacho());
+	        }
+	        if(pedSAP.getCantidadPendienteDespacho()!=null) {
+	        	pendienteDespachoSAP =Float.parseFloat(pedSAP.getCantidadPendienteDespacho());
+	        }
+	        if (datosBD.containsKey("cantidadPedida")) {
+	            pedidaBD =Float.parseFloat(datosBD.get("cantidadPedida").toString());
+	        }
+	        if(pedSAP.getCantidadPedido()!=null) {
+	        	pedidaSAP = Float.parseFloat(pedSAP.getCantidadPedido().toString());
+	        }
+	        if (datosBD.containsKey("cantidadEntregada")) {
+	        	entregadaBD =Float.parseFloat(datosBD.get("cantidadEntregada").toString());
+	        }
+	        if(pedSAP.getCantidadEntrega()!=null){
+	        	entregadaSAP = Float.parseFloat(pedSAP.getCantidadEntrega().toString());
+	        }
+	        // Comparar si hay diferencias en alguno de los campos
+	        return despachadaBD.equals(despachadaSAP) &&
+	        		pendienteDespachoBD.equals(pendienteDespachoSAP) &&
+	               pedidaBD.equals(pedidaSAP) &&
+	               entregadaBD.equals(entregadaSAP);
+	               
+	    } catch (Exception e) {
+	        // En caso de error en conversión, considerar que sí hay cambios
+	        System.err.println("Error comparando folio: " + e.getMessage());
+	        return true;
+	    }
+	}
+	private boolean tieneCambiosAdicionales(Map<String, Object> datosBD, PedidoSapResponseDTO pedSAP) {
+	    try {
+	        // Comparar campos adicionales si existen en el Map
+	        if (datosBD.containsKey("cantidadPedida")) {
+	            Float pedidaBD =Float.parseFloat(datosBD.get("cantidadPedida").toString());
+	            Float pedidaSAP = Float.parseFloat(pedSAP.getCantidadPedido().toString());
+	            if (!pedidaBD.equals(pedidaSAP)) return true;
+	        }
+	        if (datosBD.containsKey("cantidadEntregada")) {
+	        	Float entregadaBD =Float.parseFloat(datosBD.get("cantidadEntregada").toString());
+	        	Float entregadaSAP = Float.parseFloat(pedSAP.getCantidadEntrega().toString());
+	            if (!entregadaBD.equals(entregadaSAP)) return true;
+	        }
+	        return false;
+	    } catch (Exception e) {
+	        return true;
+	    }
+	}
+	
 }

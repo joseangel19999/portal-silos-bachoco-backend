@@ -46,6 +46,7 @@ com\bachoco\persistence\adapter\CategoriaJpaAdapter.class
 com\bachoco\dto\BoletaDTO.class
 com\bachoco\dto\sap\confDespacho\GoodsmvtHeadret.class
 com\bachoco\controller\ReporteProgramArriboController.class
+com\bachoco\utils\ComparadorTrasladosSAP.class
 com\bachoco\dto\SiloRequestDto.class
 com\bachoco\persistence\repository\CatalogJdbcRepository.class
 com\bachoco\persistence\entity\PlantaEntity.class
@@ -64,12 +65,14 @@ com\bachoco\persistence\repository\PedidoTrasladoJdbcRepository.class
 com\bachoco\dto\BoletaSalida.class
 com\bachoco\persistence\adapter\OtpJpaAdapter.class
 com\bachoco\controller\CatalogController.class
+com\bachoco\persistence\config\ExternalConfig.class
 com\bachoco\dto\EmpleadoInternoResponseDto.class
 com\bachoco\persistence\repository\EmpleadoInternoJdbcRepository.class
 com\bachoco\security\SecurityConfig.class
 com\bachoco\persistence\adapter\ProgramArriboSapWebClientAdapter.class
 com\bachoco\controller\EmpleadoExternoController.class
 com\bachoco\persistence\adapter\EmpleadoInternoJpaRepositoryAdapter.class
+com\bachoco\persistence\config\ConfigValidator.class
 com\bachoco\persistence\repository\EmpleadoJpaRepository.class
 com\bachoco\persistence\entity\PerfilEntity.class
 com\bachoco\persistence\adapter\PuestoJpaRepositoryAdapter.class
@@ -112,6 +115,7 @@ com\bachoco\persistence\repository\CatalogJdbcRepository$1.class
 com\bachoco\secutiry\utils\Utileria.class
 com\bachoco\controller\scheduler\OtpCleanupScheduler.class
 com\bachoco\mapper\rowMapper\PedidoTrasladoRowMapper.class
+com\bachoco\service\ActualizacionTrasladosService.class
 com\bachoco\secutiry\utils\SecurityTextUtils.class
 com\bachoco\mapper\PedidoCompraMapper.class
 com\bachoco\persistence\repository\PerfilJpaRepository.class
@@ -141,6 +145,7 @@ com\bachoco\persistence\adapter\ReporteProgramaArriboRepositoryAdapter.class
 com\bachoco\persistence\adapter\PlantaJpaRepositoryAdapter.class
 com\bachoco\controller\BodegaController.class
 com\bachoco\controller\ProgramArriboController.class
+com\bachoco\utils\UtileriaComparators.class
 com\bachoco\persistence\repository\ConfDespachoJdbcRepository.class
 com\bachoco\controller\PedidoTrasladoController.class
 com\bachoco\dto\PasswordOtpRequest.class

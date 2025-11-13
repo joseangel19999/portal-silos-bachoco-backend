@@ -17,9 +17,10 @@ public class PedidoTrasladoJdbcUseCase {
 	public PedidoTrasladoJdbcUseCase(PedidoTrasladoJdbcRepositoryPort pedidoTrasladoJdbcRepositoryPort) {
 		this.pedidoTrasladoJdbcRepositoryPort = pedidoTrasladoJdbcRepositoryPort;
 	}
-	public List<PedidoTrasladoDTO> findByFilters(String claveSilo,String claveMaterial,String fechaInicio,String fechaFin){
+	public List<PedidoTrasladoDTO> findByFilters(String claveSilo,String claveMaterial,
+			String plantaDestino,String fechaInicio,String fechaFin){
 		try {
-			return this.pedidoTrasladoJdbcRepositoryPort.findByFilterSiloAndMaterialAnFecha(claveSilo, claveMaterial, fechaInicio, fechaFin);
+			return this.pedidoTrasladoJdbcRepositoryPort.findByFilterSiloAndMaterialAnFecha(claveSilo, claveMaterial,plantaDestino, fechaInicio, fechaFin);
 		}catch(NotFoundPlantaDestinoException ex) {
 			throw ex;
 		}catch(NotFoundMaterialException ex) {
@@ -31,10 +32,16 @@ public class PedidoTrasladoJdbcUseCase {
 			throw new RegistroNoCreadoException(e.getMessage());
 		}
 	}
-	public void executeDowloadPedTrasladoBySap(String claveSilo,String claveMaterial,String fechaInicio,String fechaFin){
+	public void executeDowloadPedTrasladoBySap(String claveSilo,String claveMaterial,String plantaDestino,String fechaInicio,String fechaFin){
 		try {
-			this.pedidoTrasladoJdbcRepositoryPort.findByFilterSiloAndMaterialAnFecha(claveSilo, claveMaterial, fechaInicio, fechaFin);
+			this.pedidoTrasladoJdbcRepositoryPort.findByFilterSiloAndMaterialAnFecha(claveSilo, claveMaterial,plantaDestino, fechaInicio, fechaFin);
 			//this.pedidoTrasladoJdbcRepositoryPort.executeDowloadPedTrasladoBySap(claveSilo, claveMaterial, fechaInicio, fechaFin);
+		}catch (NotFoundPlantaDestinoException ex) {
+			throw ex;
+		}catch(NotFoundMaterialException ex) {
+			throw ex;
+		}catch(NotFoundPedCompraException ex) {
+			throw ex;
 		}catch (Exception e) {
 			throw new RegistroNoCreadoException(e.getMessage());
 		}

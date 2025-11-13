@@ -1,15 +1,21 @@
 package com.bachoco.persistence.repository;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
+import com.bachoco.mapper.rowMapper.ConfirmDespachoRowMapper;
+import com.bachoco.model.ConfirmDespachoResponse;
 import com.bachoco.model.ConfirmacionDespachoRequest;
 import com.bachoco.model.ReportConfDespacho;
 
@@ -19,10 +25,18 @@ public class ConfDespachoJdbcRepository {
 	private final JdbcTemplate jdbcTemplate;
 	private SimpleJdbcCall simpleJdbcCall;
 	private final DataSource dataSource;
+	private final ConfirmDespachoRowMapper confirmDespachoRowMapper ;
+	private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-	public ConfDespachoJdbcRepository(JdbcTemplate jdbcTemplate, DataSource dataSource) {
+	
+
+	public ConfDespachoJdbcRepository(JdbcTemplate jdbcTemplate, DataSource dataSource,
+			ConfirmDespachoRowMapper confirmDespachoRowMapper,
+			NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.dataSource = dataSource;
+		this.confirmDespachoRowMapper = confirmDespachoRowMapper;
+		this.namedParameterJdbcTemplate=namedParameterJdbcTemplate;
 	}
 
 	public ReportConfDespacho findConfDespachoById(Integer idConfDespacho) {
@@ -202,6 +216,8 @@ public class ConfDespachoJdbcRepository {
 		}
 		return response;
 	}
+	
+	
 
 	public Map<String, String> updateConfDespachoSinSap(ConfirmacionDespachoRequest req, String estatus) {
 		this.simpleJdbcCall = new SimpleJdbcCall(dataSource)
@@ -235,5 +251,60 @@ public class ConfDespachoJdbcRepository {
 		}
 		return response;
 	}
+	
+	
+	public List<ConfirmDespachoResponse> findAllConfirmacionesDespacho(String silo, String material, String fechaInicio,
+			String fechaFin) {
+		String sql = """
+				                      				   SELECT 
+			            cf.TC_BODEGA_ID AS claveBodega,
+			            ped.TC_SILO_ID AS claveSilo,
+			            cf.TC_MATERIAL_ID AS claveMaterial,
+			            DATE_FORMAT(cf.FECHA_EMBARQUE, '%Y-%m-%d') AS fechaEmbarque,
+			            cf.NUMERO_BOLETA AS numBoleta,
+			            cf.PESO_BRUTO AS pesoBruto,
+			            cf.PESO_TARA AS pesoTara,
+			            cf.HUMEDAD AS humedad,
+			            cf.CHOFER AS chofer,
+			            cf.PLACA_JAULA AS placaJaula,
+			            cf.LINEA_TRANSPORTISTA AS lineaTransportista,
+			            cf.TC_PLANTA_ID AS claveDestino,
+			            ped.NUMERO_PED_TRASLADO AS numPedidoTraslado,
+			            cf.TIPO_MOVIMIENTO AS tipoMovimiento,
+			            cf.CONFIRMACION_DESPACHO_ID AS idconfDespacho,
+			            ped.PEDIDO_TRASLADO_ID AS idPedTraslado,
+			            cf.NUMERO_MOV_SAP AS numeroSap
+			        FROM tc_confirmacion_despacho cf
+			        INNER JOIN tc_pedido_traslado ped ON cf.TC_PEDIDO_TRASLADO_ID = ped.PEDIDO_TRASLADO_ID
+                     WHERE 
+			             ped.TC_SILO_ID = :silo
+			            AND cf.TC_MATERIAL_ID = :material
+			            AND (:fechaInicio IS NULL OR cf.FECHA_EMBARQUE >= STR_TO_DATE(:fechaInicio, '%Y-%m-%d'))
+			            AND (:fechaFin IS NULL OR cf.FECHA_EMBARQUE <= STR_TO_DATE(:fechaFin, '%Y-%m-%d'))
+			        ORDER BY cf.FECHA_EMBARQUE DESC
+				""";
+        
+		try {
+			Map<String, Object> params = new HashMap<>();
+	        params.put("silo", silo);
+	        params.put("material", material);
+	        params.put("fechaInicio", fechaInicio);
+	        params.put("fechaFin", fechaFin);
+	        return namedParameterJdbcTemplate.query(sql, params, confirmDespachoRowMapper);
+		} catch (EmptyResultDataAccessException e) {
+			e.printStackTrace();
+			return Collections.EMPTY_LIST;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Collections.EMPTY_LIST;
+		}
+	}
+	
+	public int deleteById(Integer confirmacionDespachoId) {
+			String sql = """
+					 DELETE FROM tc_confirmacion_despacho WHERE CONFIRMACION_DESPACHO_ID = ?
+					""";
+        return jdbcTemplate.update(sql, confirmacionDespachoId);
+    }
 
 }

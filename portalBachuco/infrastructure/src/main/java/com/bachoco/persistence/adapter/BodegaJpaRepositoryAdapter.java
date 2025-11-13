@@ -3,8 +3,10 @@ package com.bachoco.persistence.adapter;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.bachoco.exception.CannotDeleteResourceException;
 import com.bachoco.mapper.BodegaMapper;
 import com.bachoco.model.Bodega;
 import com.bachoco.persistence.entity.BodegaEntity;
@@ -52,7 +54,12 @@ public class BodegaJpaRepositoryAdapter implements BodegaRepositoryPort{
 	public void delete(Integer id) {
 		Optional<BodegaEntity> entity=this.bodegaRepository.findById(id);
 		if(entity.isPresent()) {
-			this.bodegaRepository.delete(entity.get());
+			try {
+				this.bodegaRepository.delete(entity.get());
+			}catch (DataIntegrityViolationException e) {
+				throw new CannotDeleteResourceException(
+		                "No se puede eliminar la bodega, existen pedidos asociados.", e);
+			}
 		}
 	}
 

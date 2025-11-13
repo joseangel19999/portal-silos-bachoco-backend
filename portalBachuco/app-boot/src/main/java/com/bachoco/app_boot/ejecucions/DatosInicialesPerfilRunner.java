@@ -13,6 +13,8 @@ import com.bachoco.persistence.entity.PerfilEntity;
 import com.bachoco.persistence.entity.PermisoEntity;
 import com.bachoco.persistence.repository.PerfilJpaRepository;
 
+
+
 @Component
 public class DatosInicialesPerfilRunner implements CommandLineRunner{
 	

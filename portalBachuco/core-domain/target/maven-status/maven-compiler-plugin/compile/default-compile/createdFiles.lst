@@ -13,6 +13,7 @@ com\bachoco\port\ConfirmacionDespachoSapPort.class
 com\bachoco\model\Material.class
 com\bachoco\port\DepartamentoRepositoryPort.class
 com\bachoco\model\PedidoTrasladoSapDTO.class
+com\bachoco\exception\SapConnectionException.class
 com\bachoco\port\EmpleadoExternoRepositoryPort.class
 com\bachoco\port\PerfilRepositoryPort.class
 com\bachoco\port\UsuarioRepositoryPort.class
@@ -22,10 +23,12 @@ com\bachoco\port\PedidoSapRepositoryPort.class
 com\bachoco\port\PasswordEncoderPort.class
 com\bachoco\model\PedidoTrasladoSapResponseDTO.class
 com\bachoco\model\Empleado.class
+com\bachoco\exception\CannotDeleteResourceException.class
 com\bachoco\model\DetallePedidoCompra.class
 com\bachoco\port\PedidoCompraRepositoryPort.class
 com\bachoco\model\procedores\PedidoTrasladoArriboDTO.class
 com\bachoco\port\TokenProviderPort.class
+com\bachoco\exception\CannotRegisterProgramArriboException.class
 com\bachoco\port\BodegaRepositoryPort.class
 com\bachoco\model\Categoria.class
 com\bachoco\model\Planta.class

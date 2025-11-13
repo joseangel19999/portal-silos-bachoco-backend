@@ -1,6 +1,9 @@
 package com.bachoco.service.usecase;
 
+import java.util.List;
+
 import com.bachoco.model.ConfDespachoPesosRequest;
+import com.bachoco.model.ConfirmDespachoResponse;
 import com.bachoco.model.ConfirmacionDespachoRequest;
 import com.bachoco.model.ConfirmacionDespachoResponse;
 import com.bachoco.port.ConfirmacionDespachoJdbcRepository;
@@ -27,5 +30,13 @@ public class ConfirmacionDespachoUseCase {
 	}
 	public Float findPromedioCantidadDespacho(Integer siloId) {
 		return this.confDespachoJdbcRepository.findCantidadPromediotrasporte(siloId);
+	}
+	
+	public List<ConfirmDespachoResponse> findAllConfirmacionDespacho(String silo,String material,String fechaInicio,String fechaFin){
+		return this.confDespachoJdbcRepository.findAllConfirmacionDespacho(silo, material, fechaInicio, fechaFin);
+	}
+	
+	public ConfirmacionDespachoResponse delete(ConfirmacionDespachoRequest req ) {
+		return this.confDespachoJdbcRepository.delete(req);
 	}
 }

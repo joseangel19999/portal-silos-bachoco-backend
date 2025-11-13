@@ -19,7 +19,7 @@ public class ReporteDespachoRepositoryAdapter implements ReporteDespachosPort {
 
 	@Override
 	public List<ReporteDespacho> findAllReportDespachos(Integer siloId, String fechaI, String fechaF) {
-		return reporteDespachoJdbcRepository.obtenerPedidosFiltrados(siloId, fechaI, fechaF);
+		return reporteDespachoJdbcRepository.obtenerPedidosFiltradosJdbc(siloId, fechaI, fechaF);
 	}
 
 }

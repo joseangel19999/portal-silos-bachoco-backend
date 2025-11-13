@@ -30,6 +30,7 @@ C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagon
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\model\ReportConfDespacho.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\port\ProgramacionArriboPort.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\port\ReporteDespachosPort.java
+C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\exception\CannotRegisterProgramArriboException.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\model\ProgramArriboRequest.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\port\ProgramArriboSapRepositoryPort.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\exception\NotFoundException.java
@@ -47,6 +48,7 @@ C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagon
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\port\PedidoSapRepositoryPort.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\port\SiloRepositoryPort.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\model\service\AuthenticationService.java
+C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\exception\SapConnectionException.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\model\ReportePorgramArribo.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\exception\NotFoundPedCompraException.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\model\service\DocumentoRepositoryPort.java
@@ -73,6 +75,7 @@ C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagon
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\port\EmpleadoInternoRepositoryPort.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\model\Empleado.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\port\ReporteProgramArriboPort.java
+C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\exception\CannotDeleteResourceException.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\model\ApiResponse.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\exception\PasswordExpirationException.java
 C:\Users\Angel Hernandez\Documents\proyecto-bachuco\proyecto-bachuco-arq-hexagonal\portalBachuco\core-domain\src\main\java\com\bachoco\exception\RegistroNoCreadoException.java

@@ -76,7 +76,7 @@ public class GenerarYEnviarOtpUseCase implements IGenerarYEnviarOtp {
 	public int sendPasswordByCorreo(String password, String correo) {
 		int response = -1;
 		try {
-			EmailMensaje email = new EmailMensaje(correo, "Codigo OTP", "Su contraseña de acceso inicial es para el portal de Bachoco silos es: : " +password);
+			EmailMensaje email = new EmailMensaje(correo, "CONTRASEÑA INICIAL", "Su contraseña de acceso inicial para el Portal Silos Bachoco es: : " +password);
 			response = emailSender.enviar(email);
 		} catch (Exception e) {
 			e.printStackTrace();

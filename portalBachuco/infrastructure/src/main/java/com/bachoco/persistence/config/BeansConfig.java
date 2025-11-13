@@ -95,8 +95,10 @@ public class BeansConfig {
 	}
 	
 	@Bean
-	public EmpleadoExternoUseCase empleadoExternoUseCase(EmpleadoExternoRepositoryPort empExternoRepositoryPort) {
-		return new EmpleadoExternoUseCase(empExternoRepositoryPort);
+	public EmpleadoExternoUseCase empleadoExternoUseCase(UsuarioRepositoryPort usuarioRepositoryPort,
+			EmpleadoExternoRepositoryPort empExternoRepositoryPort,
+			GenerarYEnviarOtpUseCase generarYEnviarOtpUseCase) {
+		return new EmpleadoExternoUseCase(usuarioRepositoryPort,empExternoRepositoryPort,generarYEnviarOtpUseCase);
 	}
 	
 	@Bean

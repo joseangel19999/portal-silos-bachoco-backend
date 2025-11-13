@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,8 +45,8 @@ public class PedidoCompraJdbcRepositoryAdapter implements PedidoCompraJdbcReposi
 	}
 
 	private List<PedidoTrasladoSapResponseDTO> findAllPedidoCTraslado(String claveSilo, String claveMaterial,
-			String fechaInicio, String fechaFin) {
-		return this.pedidoTrasladoSapPort.findAllPedTraslado(claveSilo,claveMaterial, toReplace(fechaInicio),
+			String plantaDestino,String fechaInicio, String fechaFin) {
+		return this.pedidoTrasladoSapPort.findAllPedTraslado(claveSilo,claveMaterial,plantaDestino, toReplace(fechaInicio),
 				toReplace(fechaFin), sapProperties.getUrl());
 	}
 
@@ -59,17 +60,22 @@ public class PedidoCompraJdbcRepositoryAdapter implements PedidoCompraJdbcReposi
 		}
 		List<PedidoSapResponseDTO> nuevaListCompras = compra.stream().map(item -> {
 			String folio = buildFolioPedCompraAnPosicion(item.getPedCompra(), item.getPosicion());
-			String cantidadDespacho = mapFolios.get(folio);
-			if (cantidadDespacho != null) {
+			String cantidadDespachoPeTraslado = mapFolios.get(folio);
+			if (cantidadDespachoPeTraslado != null) {
 				String cantPendDespacho="0";
 				if(item.getCantidadPedido()!=null) {
-					cantPendDespacho=String.valueOf(Float.parseFloat(item.getCantidadPedido())-Float.parseFloat(cantidadDespacho));
+					cantPendDespacho=String.valueOf(Float.parseFloat(item.getCantidadPedido())-Float.parseFloat(cantidadDespachoPeTraslado));
 				}
 				// Crear nuevo objeto modificado (no mutamos el original)
-				item.setCantidadDespacho(cantidadDespacho);
-				item.setCantidadPendienteDespacho(cantidadDespacho);
+				item.setCantidadPendienteDespacho(cantPendDespacho);
+				item.setCantidadDespacho(cantidadDespachoPeTraslado);
 				return item;
 			} else {
+				/*if(item.getCantidadPedido()!=null) {
+					item.setCantidadPendienteDespacho(item.getCantidadPedido());
+				}
+				item.setCantidadDespacho(cantidadDespachoPeTraslado);
+				item.setCantidadPendienteDespacho(item.getCantidadPedido());*/
 				return item; // sin cambios
 			}
 		}).toList(); // en Java 21 toList() devuelve lista inmutable
@@ -78,28 +84,36 @@ public class PedidoCompraJdbcRepositoryAdapter implements PedidoCompraJdbcReposi
 
 	@Override
 	public List<PedidoCompraDTO> findByFilterSiloAndMaterialAnFecha(String claveSilo, String claveMaterial,
-			String fechaInicio, String fechaFin) {
+			String plantaDestino,String fechaInicio, String fechaFin) {
 		List<PedidoCompraDTO> response = new ArrayList<>();
 		List<String> foliosExists = new ArrayList<>();
 		List<PedidoTrasladoSapResponseDTO> pedidosTrasladoSap = findAllPedidoCTraslado(claveSilo, claveMaterial,
-				fechaInicio, fechaFin);
+				plantaDestino,fechaInicio, fechaFin);
 		List<PedidoSapResponseDTO> pedidosSap = findAllPedidoCompra(claveSilo, claveMaterial, fechaInicio, fechaFin);
 		List<PedidoSapResponseDTO> updateCompras = assignedCantidadDespacho(pedidosSap, pedidosTrasladoSap);
+		
 		if (updateCompras.size() > 0) {
+			List<Map<String, Object>> foliosCantidadesModificar= new ArrayList<>();
 			List<String> folioPedCompraPosicion = updateCompras.stream()
 					.map(p -> buildFolioPedCompraAnPosicion(p.getPedCompra(), p.getPosicion())).toList();
 			List<List<String>> batches = BatchUtils.partition(folioPedCompraPosicion, 100);
 			for (List<String> batch : batches) {
 				foliosExists.addAll(this.pedidoCompraJdbcRepository.findAllFoliosExist(batch));
+				foliosCantidadesModificar.addAll(this.pedidoCompraJdbcRepository.findAllFoliosExistCantidades(batch));
 			}
+			//this.updateCantidades(updateCompras,convertToFolioMap(foliosCantidadesModificar));
+			//se crear una lista set para evitar duplicados
 			Set<String> foliosExist = new HashSet<>(foliosExists);
 			List<PedidoSapResponseDTO> pedidosSapNoExistBd = updateCompras.stream().filter(
 					p -> !foliosExist.contains(buildFolioPedCompraAnPosicion(p.getPedCompra(), p.getPosicion())))
 					.toList();
 			List<String> foliosNoExistSap = pedidosSapNoExistBd.stream()
 					.map(p -> buildFolioPedCompraAnPosicion(p.getPedCompra(), p.getPosicion())).toList();
+			if(foliosCantidadesModificar.size()>0) {
+				this.pedidoCompraJdbcRepository.updateCantidades(updateCompras,convertToFolioMap(foliosCantidadesModificar));
+			}
 			if (pedidosSapNoExistBd.size() > 0) {
-				this.pedidoCompraJdbcRepository.savePedidoCompra(pedidosSapNoExistBd);
+				this.pedidoCompraJdbcRepository.savePedidoCompra(pedidosSapNoExistBd,claveSilo);
 				foliosExists.addAll(foliosNoExistSap);
 				List<List<String>> batchesFolios = BatchUtils.partition(foliosExists, 100);
 				for (List<String> batch : batchesFolios) {
@@ -115,12 +129,20 @@ public class PedidoCompraJdbcRepositoryAdapter implements PedidoCompraJdbcReposi
 		return response;
 	}
 	
+	public Map<String, Map<String, Object>> convertToFolioMap(List<Map<String, Object>> resultados) {
+	    return resultados.stream()
+	        .collect(Collectors.toMap(
+	            row -> (String) row.get("folio"),
+	            row -> row
+	        ));
+	}
+	
 	@Override
-	public void executePedidoCompraByFilter(String claveSilo, String claveMaterial, String fechaInicio,
+	public void executePedidoCompraByFilter(String claveSilo, String claveMaterial,String plantaDestino, String fechaInicio,
 			String fechaFin) {
 		List<String> foliosExists = new ArrayList<>();
 		List<PedidoTrasladoSapResponseDTO> pedidosTrasladoSap = findAllPedidoCTraslado(claveSilo, claveMaterial,
-				fechaInicio, fechaFin);
+				plantaDestino,fechaInicio, fechaFin);
 		List<PedidoSapResponseDTO> pedidosSap = findAllPedidoCompra(claveSilo, claveMaterial, fechaInicio, fechaFin);
 		List<PedidoSapResponseDTO> updateCompras = assignedCantidadDespacho(pedidosSap, pedidosTrasladoSap);
 		if (updateCompras.size() > 0) {
@@ -135,7 +157,7 @@ public class PedidoCompraJdbcRepositoryAdapter implements PedidoCompraJdbcReposi
 					p -> !foliosExist.contains(buildFolioPedCompraAnPosicion(p.getPedCompra(), p.getPosicion())))
 					.toList();
 			if (pedidosSapNoExistBd.size() > 0) {
-				this.pedidoCompraJdbcRepository.savePedidoCompra(pedidosSapNoExistBd);
+				this.pedidoCompraJdbcRepository.savePedidoCompra(pedidosSapNoExistBd,claveSilo);
 			}
 		}
 	}

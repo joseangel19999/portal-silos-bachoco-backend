@@ -34,22 +34,18 @@ public class PedidoCompraController {
 	public PedidoCompraController(PedidoCompraUsecase pedidoCompraUsecase) {
 		this.pedidoCompraUsecase = pedidoCompraUsecase;
 	}
-
 	@GetMapping("/filters")
 	public ResponseEntity<List<PedidoCompraDTO>> findAllByFilter(@RequestParam String claveSilo,
-			@RequestParam String claveMaterial, @RequestParam String fechaInicio, @RequestParam String fechaFin) {
-		//List<PedidoCompraDTO> response=new ArrayList<>();
-		List<PedidoCompraDTO> response = this.pedidoCompraUsecase.findAll(claveSilo, claveMaterial, fechaInicio, fechaFin);
+			@RequestParam String claveMaterial, @RequestParam String plantaDestino,@RequestParam String fechaInicio, @RequestParam String fechaFin) {
+		List<PedidoCompraDTO> response = this.pedidoCompraUsecase.findAll(claveSilo, claveMaterial,plantaDestino, fechaInicio, fechaFin);
 			return new ResponseEntity<List<PedidoCompraDTO>>(response, HttpStatus.OK);
 	}
-	
 	@GetMapping("/filters-dowload-ped-compra")
 	public ResponseEntity<Void> findAllDowloadPedCompra(@RequestParam String claveSilo,
-			@RequestParam String claveMaterial, @RequestParam String fechaInicio, @RequestParam String fechaFin) {
-		this.pedidoCompraUsecase.executePedidoCompraDowloadSap(claveSilo, claveMaterial, fechaInicio, fechaFin);
+			@RequestParam String claveMaterial,@RequestParam String plantaDestino, @RequestParam String fechaInicio, @RequestParam String fechaFin) {
+		this.pedidoCompraUsecase.executePedidoCompraDowloadSap(claveSilo, claveMaterial,plantaDestino, fechaInicio, fechaFin);
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
-
 	@PostMapping("/upload-pdf")
 	public ResponseEntity<Map<String, String>> saveFile(@RequestParam("file") MultipartFile file,@RequestParam("pedidoCompraId") Integer pedidoCompraId) {
 		 Map<String, String> resp = new HashMap();
@@ -72,8 +68,6 @@ public class PedidoCompraController {
 			 resp.put("message", "Fallo al subir el archivo: "+e.getMessage());
 			 resp.put("uuid", "");
 			return ResponseEntity.ok(resp);
-			/*return new ResponseEntity<>("Fallo al subir el archivo: " + e.getMessage(),
-					HttpStatus.INTERNAL_SERVER_ERROR);*/
 		}
 	}
 	
@@ -83,7 +77,6 @@ public class PedidoCompraController {
         if (eliminado) {
             return ResponseEntity.ok("1");
         } else {
-            // Devuelve 404 Not Found si el documento no existe
             return ResponseEntity.ok("2");
         }
 	}

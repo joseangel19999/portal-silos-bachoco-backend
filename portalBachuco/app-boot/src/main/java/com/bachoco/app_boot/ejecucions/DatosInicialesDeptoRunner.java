@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 import com.bachoco.persistence.entity.DepartamentoEntity;
 import com.bachoco.persistence.repository.DepartamentoJpaRepository;
 
-
-
 @Component
 public class DatosInicialesDeptoRunner implements CommandLineRunner{
 
