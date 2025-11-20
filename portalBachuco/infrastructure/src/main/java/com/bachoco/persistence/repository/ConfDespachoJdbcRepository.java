@@ -25,18 +25,15 @@ public class ConfDespachoJdbcRepository {
 	private final JdbcTemplate jdbcTemplate;
 	private SimpleJdbcCall simpleJdbcCall;
 	private final DataSource dataSource;
-	private final ConfirmDespachoRowMapper confirmDespachoRowMapper ;
+	private final ConfirmDespachoRowMapper confirmDespachoRowMapper;
 	private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-	
-
 	public ConfDespachoJdbcRepository(JdbcTemplate jdbcTemplate, DataSource dataSource,
-			ConfirmDespachoRowMapper confirmDespachoRowMapper,
-			NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+			ConfirmDespachoRowMapper confirmDespachoRowMapper, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.dataSource = dataSource;
 		this.confirmDespachoRowMapper = confirmDespachoRowMapper;
-		this.namedParameterJdbcTemplate=namedParameterJdbcTemplate;
+		this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
 	}
 
 	public ReportConfDespacho findConfDespachoById(Integer idConfDespacho) {
@@ -60,25 +57,16 @@ public class ConfDespachoJdbcRepository {
 				JOIN tc_pedido_traslado pt ON cd.TC_PEDIDO_TRASLADO_ID=pt.PEDIDO_TRASLADO_ID
 				JOIN tc_planta p ON cd.TC_PLANTA_ID= p.PLANTA_ID
 				JOIN tc_material m ON cd.TC_MATERIAL_ID=m.MATERIAL_ID
-                JOIN tc_pedido_compra pc ON pt.TC_PEDIDO_COMPRA_ID=pc.PEDIDO_COMPRA_ID
-                JOIN tc_silo s ON pc.TC_SILO_ID=SILO_ID
+				            JOIN tc_pedido_compra pc ON pt.TC_PEDIDO_COMPRA_ID=pc.PEDIDO_COMPRA_ID
+				            JOIN tc_silo s ON pc.TC_SILO_ID=SILO_ID
 				where cd.CONFIRMACION_DESPACHO_ID=?
 				     """;
 		return (ReportConfDespacho) jdbcTemplate.queryForObject(sql, new Object[] { idConfDespacho }, // parámetros
-				(rs, rowNum) -> new ReportConfDespacho(
-						rs.getString("NUMERO_MOV_SAP"), 
-						rs.getString("FOLIO"),
-						rs.getString("NUMERO_PED_TRASLADO"), 
-						rs.getString("FECHA_EMBARQUE"), 
-						rs.getString("NOMBRE"),
-						rs.getString("SILO_NOMBRE"),
-						rs.getString("MATERIAL_DESCRIPCION"), 
-						rs.getString("NUMERO_BOLETA"),
-						rs.getString("PESO_BRUTO"), 
-						rs.getString("PESO_TARA"),
-						rs.getString("HUMEDAD"),
-						rs.getString("CHOFER"),
-						rs.getString("PLACA_JAULA"), 
+				(rs, rowNum) -> new ReportConfDespacho(rs.getString("NUMERO_MOV_SAP"), rs.getString("FOLIO"),
+						rs.getString("NUMERO_PED_TRASLADO"), rs.getString("FECHA_EMBARQUE"), rs.getString("NOMBRE"),
+						rs.getString("SILO_NOMBRE"), rs.getString("MATERIAL_DESCRIPCION"),
+						rs.getString("NUMERO_BOLETA"), rs.getString("PESO_BRUTO"), rs.getString("PESO_TARA"),
+						rs.getString("HUMEDAD"), rs.getString("CHOFER"), rs.getString("PLACA_JAULA"),
 						rs.getString("LINEA_TRANSPORTISTA")));
 	}
 
@@ -116,7 +104,7 @@ public class ConfDespachoJdbcRepository {
 			return null;
 		}
 	}
-	
+
 	public Float findPesoNetoByIdPedtraslado(Integer idConfDespacho) {
 		String sql = """
 				        SELECT cd.PESO_NETO FROM tc_confirmacion_despacho cd
@@ -146,13 +134,13 @@ public class ConfDespachoJdbcRepository {
 			return null;
 		}
 	}
-	
+
 	public Map<String, String> registroConfDespacho(ConfirmacionDespachoRequest req, String numeroSap, String estatus) {
 		this.simpleJdbcCall = new SimpleJdbcCall(dataSource).withProcedureName("sp_inserta_conf_despacho");
 		Map<String, Object> params = new HashMap<>();
 		Map<String, String> response = new HashMap<>();
 		params.put("p_clave_bodega", req.getClaveBodega());
-		params.put("p_clave_silo", "CE12");
+		params.put("p_clave_silo", req.getClaveSilo());
 		params.put("p_clave_material", req.getClaveMaterial());
 		params.put("p_fecha_embarque", java.sql.Date.valueOf(req.getFechaEmbarque()));
 		params.put("p_numero_boleta", req.getNumBoleta());
@@ -173,6 +161,7 @@ public class ConfDespachoJdbcRepository {
 			Map<String, Object> result = simpleJdbcCall.execute(params);
 			Integer idGenerado = (Integer) result.get("p_conf_despacho_id");
 			response.put("estatus", "0");
+			response.put("folio", getFolio(idGenerado));
 			response.put("id", idGenerado.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -182,13 +171,28 @@ public class ConfDespachoJdbcRepository {
 		return response;
 	}
 
+	private String getFolio(Integer id) {
+		String sql = """
+				   select c.FOLIO from tc_confirmacion_despacho c where CONFIRMACION_DESPACHO_ID=?
+				""";
+		try {
+			String resultado = jdbcTemplate.queryForObject(sql, String.class, id);
+			return resultado;
+		} catch (EmptyResultDataAccessException e) {
+
+		} catch (Exception e) {
+
+		}
+		return "";
+	}
+
 	public Map<String, String> updateConfDespacho(ConfirmacionDespachoRequest req, String numeroSap, String estatus) {
 		this.simpleJdbcCall = new SimpleJdbcCall(dataSource).withProcedureName("sp_modifica_conf_despacho");
 		Map<String, Object> params = new HashMap<>();
 		Map<String, String> response = new HashMap<>();
-		params.put("p_conf_despacho_id", req.getIdconfDespacho());
+		params.put("p_conf_despacho_id", req.getIdConfDespacho());
 		params.put("p_clave_bodega", req.getClaveBodega());
-		params.put("p_clave_silo",req.getClaveSilo());
+		params.put("p_clave_silo", req.getClaveSilo());
 		params.put("p_clave_material", req.getClaveMaterial());
 		params.put("p_fecha_embarque", java.sql.Date.valueOf(req.getFechaEmbarque()));
 		params.put("p_numero_boleta", req.getNumBoleta());
@@ -198,7 +202,7 @@ public class ConfDespachoJdbcRepository {
 		params.put("p_chofer", req.getChofer());
 		params.put("p_placa_jaula", req.getPlacaJaula());
 		params.put("p_linea_transportista", req.getLineaTransportista());
-		params.put("p_clave_destino", req.getClaveDestino());
+		params.put("p_clave_destino", req.getDestinoId());
 		params.put("p_num_pedido_traslado", req.getNumPedidoTraslado());
 		params.put("p_tipo_movimiento", req.getTipoMovimiento());
 		params.put("p_numero_sap", numeroSap);
@@ -216,15 +220,13 @@ public class ConfDespachoJdbcRepository {
 		}
 		return response;
 	}
-	
-	
 
 	public Map<String, String> updateConfDespachoSinSap(ConfirmacionDespachoRequest req, String estatus) {
 		this.simpleJdbcCall = new SimpleJdbcCall(dataSource)
 				.withProcedureName("sp_modifica_conf_despacho_sin_response_sap");
 		Map<String, Object> params = new HashMap<>();
 		Map<String, String> response = new HashMap<>();
-		params.put("p_conf_despacho_id", req.getIdconfDespacho());
+		params.put("p_conf_despacho_id", req.getIdConfDespacho());
 		params.put("p_clave_bodega", req.getClaveBodega());
 		params.put("p_clave_silo", req.getClaveSilo());
 		params.put("p_clave_material", req.getClaveMaterial());
@@ -234,7 +236,7 @@ public class ConfDespachoJdbcRepository {
 		params.put("p_chofer", req.getChofer());
 		params.put("p_placa_jaula", req.getPlacaJaula());
 		params.put("p_linea_transportista", req.getLineaTransportista());
-		params.put("p_clave_destino", req.getClaveDestino());
+		params.put("p_clave_destino", req.getDestinoId());
 		params.put("p_num_pedido_traslado", req.getNumPedidoTraslado());
 		params.put("p_tipo_movimiento", req.getTipoMovimiento());
 		params.put("p_pedido_traslado_id", req.getIdPedTraslado());
@@ -251,46 +253,46 @@ public class ConfDespachoJdbcRepository {
 		}
 		return response;
 	}
-	
-	
+
 	public List<ConfirmDespachoResponse> findAllConfirmacionesDespacho(String silo, String material, String fechaInicio,
 			String fechaFin) {
 		String sql = """
-				                      				   SELECT 
-			            cf.TC_BODEGA_ID AS claveBodega,
-			            ped.TC_SILO_ID AS claveSilo,
-			            cf.TC_MATERIAL_ID AS claveMaterial,
-			            DATE_FORMAT(cf.FECHA_EMBARQUE, '%Y-%m-%d') AS fechaEmbarque,
-			            cf.NUMERO_BOLETA AS numBoleta,
-			            cf.PESO_BRUTO AS pesoBruto,
-			            cf.PESO_TARA AS pesoTara,
-			            cf.HUMEDAD AS humedad,
-			            cf.CHOFER AS chofer,
-			            cf.PLACA_JAULA AS placaJaula,
-			            cf.LINEA_TRANSPORTISTA AS lineaTransportista,
-			            cf.TC_PLANTA_ID AS claveDestino,
-			            ped.NUMERO_PED_TRASLADO AS numPedidoTraslado,
-			            cf.TIPO_MOVIMIENTO AS tipoMovimiento,
-			            cf.CONFIRMACION_DESPACHO_ID AS idconfDespacho,
-			            ped.PEDIDO_TRASLADO_ID AS idPedTraslado,
-			            cf.NUMERO_MOV_SAP AS numeroSap
-			        FROM tc_confirmacion_despacho cf
-			        INNER JOIN tc_pedido_traslado ped ON cf.TC_PEDIDO_TRASLADO_ID = ped.PEDIDO_TRASLADO_ID
-                     WHERE 
-			             ped.TC_SILO_ID = :silo
-			            AND cf.TC_MATERIAL_ID = :material
-			            AND (:fechaInicio IS NULL OR cf.FECHA_EMBARQUE >= STR_TO_DATE(:fechaInicio, '%Y-%m-%d'))
-			            AND (:fechaFin IS NULL OR cf.FECHA_EMBARQUE <= STR_TO_DATE(:fechaFin, '%Y-%m-%d'))
-			        ORDER BY cf.FECHA_EMBARQUE DESC
+				     SELECT
+				           cf.TC_BODEGA_ID AS claveBodega,
+				           ped.TC_SILO_ID AS claveSilo,
+				           cf.TC_MATERIAL_ID AS claveMaterial,
+				           DATE_FORMAT(cf.FECHA_EMBARQUE, '%Y-%m-%d') AS fechaEmbarque,
+				           cf.NUMERO_BOLETA AS numBoleta,
+				           cf.PESO_BRUTO AS pesoBruto,
+				           cf.PESO_TARA AS pesoTara,
+				           cf.HUMEDAD AS humedad,
+				           cf.CHOFER AS chofer,
+				           cf.PLACA_JAULA AS placaJaula,
+				           cf.LINEA_TRANSPORTISTA AS lineaTransportista,
+				           cf.TC_PLANTA_ID AS claveDestino,
+				           ped.NUMERO_PED_TRASLADO AS numPedidoTraslado,
+				           cf.TIPO_MOVIMIENTO AS tipoMovimiento,
+				           cf.CONFIRMACION_DESPACHO_ID AS idconfDespacho,
+				           ped.PEDIDO_TRASLADO_ID AS idPedTraslado,
+				           cf.NUMERO_MOV_SAP AS numeroSap,
+				           cf.FOLIO
+				       FROM tc_confirmacion_despacho cf
+				       INNER JOIN tc_pedido_traslado ped ON cf.TC_PEDIDO_TRASLADO_ID = ped.PEDIDO_TRASLADO_ID
+				                 WHERE
+				            ped.TC_SILO_ID = :silo
+				           AND cf.TC_MATERIAL_ID = :material
+				           AND (:fechaInicio IS NULL OR cf.FECHA_EMBARQUE >= STR_TO_DATE(:fechaInicio, '%Y-%m-%d'))
+				           AND (:fechaFin IS NULL OR cf.FECHA_EMBARQUE <= STR_TO_DATE(:fechaFin, '%Y-%m-%d'))
+				       ORDER BY cf.FECHA_EMBARQUE DESC
 				""";
-        
+
 		try {
 			Map<String, Object> params = new HashMap<>();
-	        params.put("silo", silo);
-	        params.put("material", material);
-	        params.put("fechaInicio", fechaInicio);
-	        params.put("fechaFin", fechaFin);
-	        return namedParameterJdbcTemplate.query(sql, params, confirmDespachoRowMapper);
+			params.put("silo", silo);
+			params.put("material", material);
+			params.put("fechaInicio", fechaInicio);
+			params.put("fechaFin", fechaFin);
+			return namedParameterJdbcTemplate.query(sql, params, confirmDespachoRowMapper);
 		} catch (EmptyResultDataAccessException e) {
 			e.printStackTrace();
 			return Collections.EMPTY_LIST;
@@ -299,12 +301,12 @@ public class ConfDespachoJdbcRepository {
 			return Collections.EMPTY_LIST;
 		}
 	}
-	
+
 	public int deleteById(Integer confirmacionDespachoId) {
-			String sql = """
-					 DELETE FROM tc_confirmacion_despacho WHERE CONFIRMACION_DESPACHO_ID = ?
-					""";
-        return jdbcTemplate.update(sql, confirmacionDespachoId);
-    }
+		String sql = """
+				 DELETE FROM tc_confirmacion_despacho WHERE CONFIRMACION_DESPACHO_ID = ?
+				""";
+		return jdbcTemplate.update(sql, confirmacionDespachoId);
+	}
 
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bachoco.dto.PlantaRequest;
@@ -88,6 +89,13 @@ public class PlantaController {
 	@GetMapping
 	public ResponseEntity<List<PlantaResponse>> findAll(){
 		List<Planta> savePlanta=this.plantaUseCase.findAll();
+		List<PlantaResponse> response= savePlanta.stream().map(i-> new PlantaResponse(i.getId(),i.getPlanta(),i.getNombre(),i.getSociedad())).collect(Collectors.toList());
+		return new ResponseEntity<List<PlantaResponse>>(response,HttpStatus.OK);
+	}
+	
+	@GetMapping("/plantas-programadas-arribo")
+	public ResponseEntity<List<PlantaResponse>> findAllByProgramArribo(@RequestParam String fechaInicio,@RequestParam String fechaFin){
+		List<Planta> savePlanta=this.plantaUseCase.findAllByProgramArribo(fechaInicio,fechaFin);
 		List<PlantaResponse> response= savePlanta.stream().map(i-> new PlantaResponse(i.getId(),i.getPlanta(),i.getNombre(),i.getSociedad())).collect(Collectors.toList());
 		return new ResponseEntity<List<PlantaResponse>>(response,HttpStatus.OK);
 	}

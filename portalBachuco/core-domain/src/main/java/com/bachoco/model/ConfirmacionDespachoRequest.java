@@ -16,8 +16,9 @@ public class ConfirmacionDespachoRequest {
 	private String claveDestino;
 	private String numPedidoTraslado;
 	private String tipoMovimiento;
-	private Integer idconfDespacho;
+	private Integer idConfDespacho;
 	private Integer idPedTraslado;
+	private Integer destinoId;
 	
 	public ConfirmacionDespachoRequest() {
 	}
@@ -134,19 +135,27 @@ public class ConfirmacionDespachoRequest {
 		this.tipoMovimiento = tipoMovimiento;
 	}
 
-	public Integer getIdconfDespacho() {
-		return idconfDespacho;
-	}
-
-	public void setIdconfDespacho(Integer idconfDespacho) {
-		this.idconfDespacho = idconfDespacho;
-	}
-
 	public Integer getIdPedTraslado() {
 		return idPedTraslado;
 	}
 
 	public void setIdPedTraslado(Integer idPedTraslado) {
 		this.idPedTraslado = idPedTraslado;
+	}
+
+	public Integer getIdConfDespacho() {
+		return idConfDespacho;
+	}
+
+	public void setIdConfDespacho(Integer idConfDespacho) {
+		this.idConfDespacho = idConfDespacho;
+	}
+
+	public Integer getDestinoId() {
+		return destinoId;
+	}
+
+	public void setDestinoId(Integer destinoId) {
+		this.destinoId = destinoId;
 	}
 }

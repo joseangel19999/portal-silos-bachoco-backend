@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bachoco.model.procedores.PedTrasladoArriboConfigDespachoDTO;
 import com.bachoco.model.procedores.PedidoTrasladoArriboDTO;
 import com.bachoco.model.procedores.PedidoTrasladoDTO;
 import com.bachoco.service.usecase.PedidoTrasladoJdbcUseCase;
@@ -58,9 +59,9 @@ public class PedidoTrasladoController {
 	}
 	
 	@GetMapping("/filters/conf-despacho")
-	public ResponseEntity<List<PedidoTrasladoArriboDTO>> findByPedTrasladoByConfDespacho(@RequestParam Integer siloId,@RequestParam Integer materialId,
+	public ResponseEntity<List<PedTrasladoArriboConfigDespachoDTO>> findByPedTrasladoByConfDespacho(@RequestParam Integer siloId,@RequestParam Integer materialId,
 			@RequestParam String fechaInicio,String fechaFin){
-		List<PedidoTrasladoArriboDTO> response=this.pedidoTrasladoJdbcUseCase.findByPedTrasladoByConfDespacho(siloId,materialId,fechaInicio,fechaFin);
+		List<PedTrasladoArriboConfigDespachoDTO> response=this.pedidoTrasladoJdbcUseCase.findByPedTrasladoByConfDespacho(siloId,materialId,fechaInicio,fechaFin);
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 }

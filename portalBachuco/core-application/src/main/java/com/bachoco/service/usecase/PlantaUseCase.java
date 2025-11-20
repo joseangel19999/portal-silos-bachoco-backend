@@ -45,4 +45,7 @@ public class PlantaUseCase {
 	public List<Planta> findAll(){
 		return this.plantaRepositoryPort.findAll();
 	}
+	public List<Planta> findAllByProgramArribo(String fechaInicio,String fechaFin){
+		return this.plantaRepositoryPort.findAllByProgramArribo(fechaInicio,fechaFin);
+	}
 }

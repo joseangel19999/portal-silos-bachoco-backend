@@ -39,6 +39,7 @@ com\bachoco\persistence\repository\CategoriaJpaRepository.class
 com\bachoco\dto\EmpleadoExternoResponseDTO.class
 com\bachoco\dto\sap\confDespacho\TReturn.class
 com\bachoco\dto\sap\confDespacho\SapResponse.class
+com\bachoco\utils\UtileriaNumeros.class
 com\bachoco\persistence\entity\PlantaEntity$PlantaEntityBuilder.class
 com\bachoco\persistence\entity\UsuarioEntity.class
 com\bachoco\persistence\entity\PuestoEntity.class
@@ -172,6 +173,7 @@ com\bachoco\controller\MaterialController.class
 com\bachoco\persistence\adapter\SiloJpaAdapter.class
 com\bachoco\mapper\PedidoSapClientMapper.class
 com\bachoco\controller\EmpleadoInternoController.class
+com\bachoco\mapper\rowMapper\ConfirmDespachoRowMapper.class
 com\bachoco\persistence\adapter\EmpleadoExtJdbcRepositoryPort.class
 com\bachoco\persistence\entity\UsuarioEntity$UsuarioEntityBuilder.class
 com\bachoco\persistence\adapter\MaterialJpaAdapter.class

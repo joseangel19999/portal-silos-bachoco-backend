@@ -80,6 +80,29 @@ public class PedidoCompraJdbcRepository {
 		params.put("folios", folios);
 		return namedParameterJdbcTemplate.query(sql, params, pedidoCompraRowMapper);
 	}
+	
+	public List<PedidoCompraDTO> findAllPedidoCompra() {
+		  String sql = """
+			        SELECT
+			            pc.PEDIDO_COMPRA_ID,
+			            pc.NUMERO_PEDIDO,
+			            pc.POSICION,
+			            pc.CANTIDAD_PEDIDA,
+			            dtpc.CANTIDAD_ENTREGADA,
+			            dtpc.CANTIDAD_DESPACHADA,
+			            dtpc.CANTIDAD_PENDIENTE_DESPACHO,
+			            pc.CONTRATO_LEGAL,
+			            pc.URL_CER_CONSERVACION,
+			            pc.CER_DEPOSITO,
+			            pc.TIPO_EXTENCION
+			        FROM
+			            tc_pedido_compra pc
+			        JOIN
+			            tc_detalle_pedido_compra dtpc ON dtpc.TC_PEDIDO_COMPRA_ID = pc.PEDIDO_COMPRA_ID
+			        """;
+
+			    return jdbcTemplate.query(sql, pedidoCompraRowMapper);
+	}
 
 	public List<String> findAllFoliosExist(List<String> folios) {
 		String sql = """
@@ -107,7 +130,8 @@ public class PedidoCompraJdbcRepository {
 				    pc.CANTIDAD_PEDIDA,
 				    dtpc.CANTIDAD_DESPACHADA,
 				    dtpc.CANTIDAD_PENDIENTE_DESPACHO,
-				    dtpc.CANTIDAD_ENTREGADA
+				    dtpc.CANTIDAD_ENTREGADA,
+				    pc.CONTRATO_LEGAL
 				FROM
 				    tc_pedido_compra pc
 				JOIN
@@ -126,6 +150,7 @@ public class PedidoCompraJdbcRepository {
 			row.put("cantidadDespachada", rs.getBigDecimal("CANTIDAD_DESPACHADA"));
 			row.put("cantidadPendienteDespacho", rs.getBigDecimal("CANTIDAD_PENDIENTE_DESPACHO"));
 			row.put("cantidadEntregada", rs.getBigDecimal("CANTIDAD_ENTREGADA"));
+			row.put("contratoLegal", rs.getString("CONTRATO_LEGAL"));
 			return row;
 		});
 	}
@@ -305,7 +330,8 @@ public class PedidoCompraJdbcRepository {
 	        SET pc.CANTIDAD_PEDIDA = :cantidadPedida,
 	            dtpc.CANTIDAD_ENTREGADA = :cantidadEntregada,
 	            dtpc.CANTIDAD_DESPACHADA = :cantidadDespachada,
-	            dtpc.CANTIDAD_PENDIENTE_DESPACHO = :cantidadPendienteDespacho
+	            dtpc.CANTIDAD_PENDIENTE_DESPACHO = :cantidadPendienteDespacho,
+	            pc.CONTRATO_LEGAL=:contratoLegal
 	        WHERE pc.FOLIO_NUM_PED_POSICION = :folio
 	        """;
 	    
@@ -325,6 +351,7 @@ public class PedidoCompraJdbcRepository {
 	                params.addValue("cantidadEntregada", UtileriaComparators.parseFloatSafe(ped.getCantidadEntrega()));
 	                params.addValue("cantidadDespachada", UtileriaComparators.parseFloatSafe(ped.getCantidadDespacho()));
 	                params.addValue("cantidadPendienteDespacho",UtileriaComparators.parseFloatSafe(ped.getCantidadPendienteDespacho()));
+	                params.addValue("contratoLegal",ped.getContratoLegal());
 	                params.addValue("folio", folio);
 	                
 	                batchParams.add(params);
@@ -346,6 +373,8 @@ public class PedidoCompraJdbcRepository {
 	        Float pedidaSAP=0.0F;
 	        Float entregadaBD=0.0F;
 	        Float entregadaSAP=0.0F;
+	        String contradoLegalSap="";
+	        String contradoLegalBD="";
 	        if(datosBD.get("cantidadDespachada")!=null) {
 	        	despachadaBD=Float.parseFloat( datosBD.get("cantidadDespachada").toString());
 	        }
@@ -370,11 +399,18 @@ public class PedidoCompraJdbcRepository {
 	        if(pedSAP.getCantidadEntrega()!=null){
 	        	entregadaSAP = Float.parseFloat(pedSAP.getCantidadEntrega().toString());
 	        }
+	        if(pedSAP.getContratoLegal()!=null) {
+	        	contradoLegalSap=pedSAP.getContratoLegal().trim();
+	        }
+	        if(datosBD.containsKey("contratoLegal")) {
+	        	contradoLegalBD=String.valueOf(datosBD.containsKey("contratoLegal")).trim();
+	        }
 	        // Comparar si hay diferencias en alguno de los campos
 	        return despachadaBD.equals(despachadaSAP) &&
 	        		pendienteDespachoBD.equals(pendienteDespachoSAP) &&
 	               pedidaBD.equals(pedidaSAP) &&
-	               entregadaBD.equals(entregadaSAP);
+	               entregadaBD.equals(entregadaSAP) &&
+	               contradoLegalBD.equalsIgnoreCase(contradoLegalSap);
 	               
 	    } catch (Exception e) {
 	        // En caso de error en conversión, considerar que sí hay cambios

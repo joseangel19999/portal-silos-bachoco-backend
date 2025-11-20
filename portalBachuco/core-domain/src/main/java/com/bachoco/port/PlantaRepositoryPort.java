@@ -13,4 +13,5 @@ public interface PlantaRepositoryPort {
 	public Optional<Planta> findBydId(Integer id);
 	public Optional<Planta> findByClave(String clave);
 	public List<Planta> findAll();
+	public List<Planta> findAllByProgramArribo(String fechaInicio,String fechaFin);
 }

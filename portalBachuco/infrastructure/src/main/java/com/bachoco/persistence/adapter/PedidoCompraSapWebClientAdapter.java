@@ -57,10 +57,13 @@ public class PedidoCompraSapWebClientAdapter implements PedidoCompraSapPort {
 			ObjectMapper objectMapper= new ObjectMapper();
 			objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 			PedidoCompraSapClientWrapper wrapper= objectMapper.readValue(jsonResponse, PedidoCompraSapClientWrapper.class);
-			if(wrapper!=null && wrapper.getItems().size()>0) {
-				 return wrapper.getItems().stream().map(p->PedidoSapClientMapper.toDomain(p)).toList();
-			}
-			return response;
+			// VERIFICACIÓN CORREGIDA:
+		    if(wrapper != null && wrapper.getItems() != null && !wrapper.getItems().isEmpty()) {
+		        return wrapper.getItems().stream().map(p -> PedidoSapClientMapper.toDomain(p)).toList();
+		    } else {
+		        logger.warn("La respuesta de SAP no contiene items o Items es null");
+		        return response;
+		    }
 		}catch (IOException e) {
 			e.printStackTrace();
 			logger.error("Hubo un error de conexion a sap de pedido compra: "+e.getMessage());

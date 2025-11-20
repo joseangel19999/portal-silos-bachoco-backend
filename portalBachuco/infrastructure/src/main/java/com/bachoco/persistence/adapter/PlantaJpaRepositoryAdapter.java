@@ -97,4 +97,10 @@ public class PlantaJpaRepositoryAdapter implements PlantaRepositoryPort {
 		return Optional.empty();
 	}
 
+	@Override
+	public List<Planta> findAllByProgramArribo(String fechaInicio,String fechaFin) {
+		List<PlantaEntity> listaPlantaEntity=this.plantaRepository.findPlantasConArribos(fechaInicio,fechaFin);
+		return PlantaMapper.toListDomain(listaPlantaEntity); 
+	}
+
 }

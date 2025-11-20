@@ -1,3 +1,4 @@
+com\bachoco\model\ConfirmDespachoResponse.class
 com\bachoco\exception\PasswordExpirationException.class
 com\bachoco\model\ConfDespachoPesosRequest.class
 com\bachoco\model\PedidoCompraSapDTO.class
@@ -43,6 +44,7 @@ com\bachoco\model\ReporteDespacho.class
 com\bachoco\port\OtpRepository.class
 com\bachoco\port\PedidoCompraJdbcRepositoryPort.class
 com\bachoco\model\ConfirmacionDespachoResponse.class
+com\bachoco\model\procedores\PedTrasladoArriboConfigDespachoDTO.class
 com\bachoco\port\PuestoRepositoryPort.class
 com\bachoco\model\PedidoCompraSapWrapper.class
 com\bachoco\model\EmailMensaje.class

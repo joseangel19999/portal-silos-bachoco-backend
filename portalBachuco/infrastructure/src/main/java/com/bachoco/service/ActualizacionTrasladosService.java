@@ -36,6 +36,7 @@ public class ActualizacionTrasladosService {
 	        List<PedidoTrasladoSapResponseDTO> trasladosParaActualizar = 
 	            comparador.encontrarTrasladosParaActualizar(datosActualesBD, pedidosSapNoExistBd);
 	        
+	        actualizarTrasladosEnBaseDeDatos(trasladosParaActualizar);
 	        // 4. Actualizar en la base de datos
 	        if (!trasladosParaActualizar.isEmpty()) {
 	            System.out.println("Actualizando " + trasladosParaActualizar.size() + " traslados...");
@@ -64,7 +65,8 @@ public class ActualizacionTrasladosService {
 	                dtpt.CANTIDAD_PEDIDO = :cantidadPedido,
 	                dtpt.CANTIDAD_TRASLADO = :cantidadTraslado,
 	                dtpt.CANTIDAD_RECIBIDA = :cantidadRecibida,
-	                dtpt.PENDIENTE_TRASLADO = :pendienteTraslado
+	                dtpt.PENDIENTE_TRASLADO = :pendienteTraslado,
+	                dtpt.TRASLADO_PENDIENTE_FACTURA = :numeroPedndFacturas
 	            WHERE pt.NUMERO_PED_TRASLADO = :numeroPedTraslado
 	            AND pt.POSICION = :posicion
 	            """;
@@ -78,11 +80,15 @@ public class ActualizacionTrasladosService {
 	            params.addValue("cantidadTraslado", parseFloatSafe(dto.getCantidadEnTraslado()));
 	            params.addValue("cantidadRecibida", parseFloatSafe(dto.getCantidadRecibidaEnPa()));
 	            params.addValue("pendienteTraslado", parseFloatSafe(dto.getCantidadPendienteTraslado()));
-	            
+	            params.addValue("numeroPedndFacturas", parseFloatSafe(dto.getTrasladosPendientes()));
 	            batchParams.add(params);
 	        }
 	        // Ejecutar actualización por lotes
-	        namedParameterJdbcTemplate.batchUpdate(sql, batchParams.toArray(new MapSqlParameterSource[0]));
+	        try {
+		        namedParameterJdbcTemplate.batchUpdate(sql, batchParams.toArray(new MapSqlParameterSource[0]));
+	        }catch (Exception e) {
+				// TODO: handle exception
+			}
 	    }
 	    
 	    private Float parseFloatSafe(String value) {

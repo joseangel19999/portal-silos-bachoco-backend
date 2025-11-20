@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import com.bachoco.exception.NotFoundMaterialException;
@@ -16,6 +16,7 @@ import com.bachoco.exception.NotFoundPedCompraException;
 import com.bachoco.exception.NotFoundPlantaDestinoException;
 import com.bachoco.exception.RegistroNoCreadoException;
 import com.bachoco.model.PedidoTrasladoSapResponseDTO;
+import com.bachoco.model.procedores.PedTrasladoArriboConfigDespachoDTO;
 import com.bachoco.model.procedores.PedidoTrasladoArriboDTO;
 import com.bachoco.model.procedores.PedidoTrasladoDTO;
 import com.bachoco.persistence.config.SapProperties;
@@ -39,6 +40,7 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 	private final MateriaJpalRepository materiaJpalRepository;
 	private final ActualizacionTrasladosService actualizacionTrasladosService;
 	private final SapProperties sapProperties;
+	private static final Logger logger = LoggerFactory.getLogger(PedidoTrasladoJdbcRepositoryAdapter.class);
 	
 
 	public PedidoTrasladoJdbcRepositoryAdapter(PedidoTrasladoJdbcRepository pedidoTrasladoJdbcRepository,
@@ -73,10 +75,10 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 					.filter(planta -> planta != null && !planta.trim().isEmpty())
 					.collect(Collectors.toList());
 
-			/*String resultValidacionPlantas=this.validateExistePlantaDestino(plantasDestino);
+			String resultValidacionPlantas=this.validateExistePlantaDestino(plantasDestino);
 			if(!resultValidacionPlantas.equals("")) {
 				throw  new NotFoundPlantaDestinoException(resultValidacionPlantas);
-			}*/
+			}
 			if(plantaDestino.trim().length()!=0) {
 				pedidosSap.removeIf(pedidoC -> !pedidoC.getPlantaDestino().equals(plantaDestino.trim()));
 			}else {
@@ -96,7 +98,6 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 			if(!resultValidacionMateriales.equals("")) {
 				throw  new NotFoundMaterialException(resultValidacionMateriales);
 			}
-			
 			//validacion que existan los pedido traslado que este asociado a pedido compra
 			pedidoCompras = pedidosSap.stream()
 				    .map(pedido -> {
@@ -123,8 +124,8 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 								&& pedidoC.getPosicion().equals(parts[1]));
 				}
 			}
+			logger.info("TAMAÑO CONSULTA SAP: "+pedidosSap.size());
 			if(pedidosSap.size()>0) {
-				actualizacionTrasladosService.procesarActualizacionTraslados(pedidosSap);
 				List<String> folios=pedidosSap.stream().map(s->s.getNumeroPedTraslado().trim().concat("-").concat(s.getPosicion().trim())).toList();
 				List<List<String>> batches = BatchUtils.partition(folios, 100);
 				for (List<String> batch : batches) {
@@ -132,19 +133,21 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 				}
 				Set<String> foliosExist = new HashSet<>(foliosExists);
 				List<PedidoTrasladoSapResponseDTO> pedidosSapNoExistBd=pedidosSap.stream().filter(p->!foliosExist.contains(folio(p.getNumeroPedTraslado(),p.getPosicion()))).toList();
-				List<String> foliosNoExistSap=pedidosSapNoExistBd.stream().map(p->buildFolioPedCompraAnPosicion(p.getNumeroPedTraslado(),p.getPosicion())).toList();
+				//List<String> foliosNoExistSap=pedidosSapNoExistBd.stream().map(p->buildFolioPedCompraAnPosicion(p.getNumeroPedTraslado(),p.getPosicion())).toList();
 				if(pedidosSapNoExistBd.size()>0){
+					logger.info("REGISTRO ");
 					this.pedidoTrasladoJdbcRepository.savePedidoTraslado(pedidosSapNoExistBd,claveSilo);
-					foliosExists.addAll(foliosNoExistSap);
+					/*foliosExists.addAll(foliosNoExistSap);
 					List<List<String>> batchesFolios = BatchUtils.partition(foliosExists, 100);
 					for (List<String> batch : batchesFolios) {
+						logger.info("SE VA HACER CONSULTA DE SAP DE NUEVOS REGISTROS SAP NO EXISTEN EN BD ");
 						response.addAll(this.pedidoTrasladoJdbcRepository.findAllByFolioNumCompra(batch));
-					}
-					return response;
-				}else {
-					for (List<String> batch : batches) {
-						response.addAll(this.pedidoTrasladoJdbcRepository.findAllByFolioNumCompra(batch));
-					}
+					}*/
+				}
+				actualizacionTrasladosService.procesarActualizacionTraslados(pedidosSap);
+				for (List<String> batch : batches) {
+					logger.info("CONSULTA DE REGISTROS DE LA BD DE FOLIOS DE SAP ");
+					response.addAll(this.pedidoTrasladoJdbcRepository.findAllByFolioNumCompra(batch));
 				}
 			}
 		}catch (NotFoundPlantaDestinoException ex) {
@@ -154,10 +157,10 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 		}catch(NotFoundPedCompraException ex) {
 			throw ex;
 		}catch (Exception e) {
-			e.printStackTrace();
 			throw  new RegistroNoCreadoException(e.getMessage());
 		}
 		return response;
+		//return this.pedidoTrasladoJdbcRepository.findAllPedidoTraslado();
 	}
 	
 	@Override
@@ -195,7 +198,7 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 	}
 	
 	@Override
-	public List<PedidoTrasladoArriboDTO> findByPedTrasladoByConfDespacho(Integer siloId,
+	public List<PedTrasladoArriboConfigDespachoDTO> findByPedTrasladoByConfDespacho(Integer siloId,
 			Integer materialId,String fechaInicio,String fechaFin) {
 		return this.pedidoTrasladoJdbcRepository.findByPedidosTrasladoParaConfDespacho(siloId, materialId,fechaInicio,fechaFin);
 	}

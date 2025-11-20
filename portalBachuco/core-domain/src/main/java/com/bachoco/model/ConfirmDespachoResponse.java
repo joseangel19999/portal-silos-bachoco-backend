@@ -18,11 +18,12 @@ public class ConfirmDespachoResponse {
 	private final String idconfDespacho;
 	private final String idPedTraslado;
 	private final String numeroSap;
+	private final String folio;
 
 	public ConfirmDespachoResponse(String claveBodega, String claveSilo, String claveMaterial, String fechaEmbarque,
 			String numBoleta, double pesoBruto, double pesoTara, String humedad, String chofer, String placaJaula,
 			String lineaTransportista, String claveDestino, String numPedidoTraslado, String tipoMovimiento,
-			String idconfDespacho, String idPedTraslado, String numeroSap) {
+			String idconfDespacho, String idPedTraslado, String numeroSap,String folio) {
 		this.claveBodega = claveBodega;
 		this.claveSilo = claveSilo;
 		this.claveMaterial = claveMaterial;
@@ -40,6 +41,11 @@ public class ConfirmDespachoResponse {
 		this.idconfDespacho = idconfDespacho;
 		this.idPedTraslado = idPedTraslado;
 		this.numeroSap = numeroSap;
+		this.folio=folio;
+	}
+
+	public String getFolio() {
+		return folio;
 	}
 
 	public String getClaveBodega() {
@@ -110,5 +116,4 @@ public class ConfirmDespachoResponse {
 		return numeroSap;
 	}
 
-	
 }

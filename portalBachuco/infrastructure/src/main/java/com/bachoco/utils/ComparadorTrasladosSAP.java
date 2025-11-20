@@ -24,9 +24,9 @@ public class ComparadorTrasladosSAP {
 			// Obtener datos actuales de BD
 			Map<String, Object> datosActuales = actualesMap.get(folio);
 
-			if (datosActuales != null && tienenDiferenciasTraslado(datosActuales, sapDTO)) {
+			//if (datosActuales != null && tienenDiferenciasTraslado(datosActuales, sapDTO)) {
 				trasladosParaActualizar.add(sapDTO);
-			}
+			//}
 		}
 
 		return trasladosParaActualizar;

@@ -6,6 +6,7 @@ import com.bachoco.exception.NotFoundMaterialException;
 import com.bachoco.exception.NotFoundPedCompraException;
 import com.bachoco.exception.NotFoundPlantaDestinoException;
 import com.bachoco.exception.RegistroNoCreadoException;
+import com.bachoco.model.procedores.PedTrasladoArriboConfigDespachoDTO;
 import com.bachoco.model.procedores.PedidoTrasladoArriboDTO;
 import com.bachoco.model.procedores.PedidoTrasladoDTO;
 import com.bachoco.port.PedidoTrasladoJdbcRepositoryPort;
@@ -52,7 +53,7 @@ public class PedidoTrasladoJdbcUseCase {
 	public List<PedidoTrasladoArriboDTO> findByFilterProgramArribo(Integer siloId,String planta,Integer materialId){
 		return this.pedidoTrasladoJdbcRepositoryPort.findByFilterProgramArribo(siloId,planta,materialId);
 	}
-	public List<PedidoTrasladoArriboDTO> findByPedTrasladoByConfDespacho(Integer siloId,Integer materialId,String fechaInicio,String fechaFin){
+	public List<PedTrasladoArriboConfigDespachoDTO> findByPedTrasladoByConfDespacho(Integer siloId,Integer materialId,String fechaInicio,String fechaFin){
 		return this.pedidoTrasladoJdbcRepositoryPort.findByPedTrasladoByConfDespacho(siloId,materialId,fechaInicio,fechaFin);
 	}
 }

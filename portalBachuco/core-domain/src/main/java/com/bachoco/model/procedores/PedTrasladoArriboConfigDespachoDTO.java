@@ -1,21 +1,23 @@
 package com.bachoco.model.procedores;
 
-public class PedidoTrasladoArriboDTO {
-	
+public class PedTrasladoArriboConfigDespachoDTO {
+
 	private Integer pedidoTrasladoId;
 	private String numeroPedPosicion;
 	private String numeroPedido;
 	private Float cantidad;
+	private String plantaDestino;
 	
-	public PedidoTrasladoArriboDTO() {
+	public PedTrasladoArriboConfigDespachoDTO() {
 	}
 
-	public PedidoTrasladoArriboDTO(Integer pedidoTrasladoId, String numeroPedPosicion, String numeroPedido,
-			Float cantidad) {
+	public PedTrasladoArriboConfigDespachoDTO(Integer pedidoTrasladoId, String numeroPedPosicion, String numeroPedido,
+			Float cantidad, String plantaDestino) {
 		this.pedidoTrasladoId = pedidoTrasladoId;
 		this.numeroPedPosicion = numeroPedPosicion;
 		this.numeroPedido = numeroPedido;
 		this.cantidad = cantidad;
+		this.plantaDestino = plantaDestino;
 	}
 
 	public Integer getPedidoTrasladoId() {
@@ -48,5 +50,13 @@ public class PedidoTrasladoArriboDTO {
 
 	public void setCantidad(Float cantidad) {
 		this.cantidad = cantidad;
+	}
+
+	public String getPlantaDestino() {
+		return plantaDestino;
+	}
+
+	public void setPlantaDestino(String plantaDestino) {
+		this.plantaDestino = plantaDestino;
 	}
 }

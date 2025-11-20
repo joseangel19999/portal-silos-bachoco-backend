@@ -19,6 +19,8 @@ import com.bachoco.dto.FolioResponseDTO;
 import com.bachoco.mapper.rowMapper.PedTrasladoCantDisponibleRowMapper;
 import com.bachoco.mapper.rowMapper.PedidoTrasladoRowMapper;
 import com.bachoco.model.PedidoTrasladoSapResponseDTO;
+import com.bachoco.model.procedores.PedTrasladoArriboConfigDespachoDTO;
+import com.bachoco.model.procedores.PedidoCompraDTO;
 import com.bachoco.model.procedores.PedidoTrasladoArriboDTO;
 import com.bachoco.model.procedores.PedidoTrasladoDTO;
 
@@ -94,6 +96,29 @@ public class PedidoTrasladoJdbcRepository {
 		Map<String, Object> params = new HashMap<>();
 		params.put("folios", folios);
 		return namedParameterJdbcTemplate.query(sql, params, pedidoTrasladoRowMapper);
+	}
+	
+	
+	public List<PedidoTrasladoDTO> findAllPedidoTraslado() {
+		  String sql = """
+			      SELECT
+					pt.PEDIDO_TRASLADO_ID,
+				       pt.FOLIO_NUM_PED_POSICION,
+				       pt.PLANTA_DESTINO,
+				       pt.NUMERO_PED_TRASLADO,
+				       dpt.CANTIDAD_PEDIDO,
+					dpt.CANTIDAD_TRASLADO,
+				       dpt.CANTIDAD_RECIBIDA as CANTIDAD_RECIBIDA_PA,
+				       dpt.PENDIENTE_TRASLADO,
+				       pc.NUMERO_PEDIDO as NUM_COMPRA_ASOCIADO,
+				       dpt.TRASLADO_PENDIENTE_FACTURA,
+				       pt.POSICION
+				   FROM
+				       tc_pedido_traslado pt
+				   JOIN tc_detalle_pedido_traslado dpt ON dpt.TC_PEDIDO_TRASLADO_ID = pt.PEDIDO_TRASLADO_ID
+				   JOIN tc_pedido_compra pc ON pt.TC_PEDIDO_COMPRA_ID=pc.PEDIDO_COMPRA_ID
+			        """;
+			    return jdbcTemplate.query(sql, pedidoTrasladoRowMapper);
 	}
 
 	public int sumaCantidadPedTraslado(Float cantidad, String numPedTraslado, Integer idPedTraslado) {
@@ -176,12 +201,13 @@ public class PedidoTrasladoJdbcRepository {
 						rs.getFloat("cantidad_pedido")));
 	}
 
-	public List<PedidoTrasladoArriboDTO> findByPedidosTrasladoParaConfDespacho(Integer siloId, Integer materialId,
+	public List<PedTrasladoArriboConfigDespachoDTO> findByPedidosTrasladoParaConfDespacho(Integer siloId, Integer materialId,
 			String fechaInicio, String fechaFin) {
 		String sql = """
 					SELECT
 					    pt.PEDIDO_TRASLADO_ID,
 						pt.FOLIO_NUM_PED_POSICION,
+						pt.PLANTA_DESTINO,
 						pt.NUMERO_PED_TRASLADO as num_pedido,
 						dpt.CANTIDAD_PEDIDO as cantidad_pedido
 						FROM tc_pedido_traslado pt
@@ -200,9 +226,11 @@ public class PedidoTrasladoJdbcRepository {
 		}
 		return jdbcTemplate.query(sql,
 				new Object[] { siloId, materialId}, // parámetros
-				(rs, rowNum) -> new PedidoTrasladoArriboDTO(rs.getInt("PEDIDO_TRASLADO_ID"),
-						rs.getString("FOLIO_NUM_PED_POSICION"), rs.getString("num_pedido"),
-						rs.getFloat("cantidad_pedido")));
+				(rs, rowNum) -> new PedTrasladoArriboConfigDespachoDTO(rs.getInt("PEDIDO_TRASLADO_ID"),
+						rs.getString("FOLIO_NUM_PED_POSICION"),
+						rs.getString("num_pedido"),
+						rs.getFloat("cantidad_pedido"),
+						rs.getString("PLANTA_DESTINO")));
 	}
 
 	public void savePedidoTraslado(List<PedidoTrasladoSapResponseDTO> pedido, String claveSilo) {

@@ -150,7 +150,7 @@ public class ReporteConfDespachoService {
         boleta.setGuia(conf.getNumeroSap());
         boleta.setChofer(conf.getChofer());
         boleta.setNumeroTicketBascula(conf.getFolio());
-        boleta.setObservaciones("DESTINO: ".concat(conf.getPlantaDestino().concat(" NO. DE PEDIDO ").concat(conf.getNumPedTraslado())));
+        boleta.setObservaciones("DESTINO ".concat(conf.getPlantaDestino().concat(" NO. DE PEDIDO ").concat(conf.getNumPedTraslado())));
         //boleta.setObservaciones("DESTINO BACHOCO CELAYA GTO. NO. DE PEDIDO ".concat(conf.getNumPedTraslado()));
         boleta.setPedidoTraslado(conf.getNumPedTraslado());
         boleta.setPesoBruto(Double.parseDouble(conf.getPesoBruto()));

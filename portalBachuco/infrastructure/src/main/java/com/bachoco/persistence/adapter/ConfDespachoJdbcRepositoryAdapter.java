@@ -3,6 +3,8 @@ package com.bachoco.persistence.adapter;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.bachoco.dto.sap.confDespacho.SapResponse;
@@ -25,6 +27,8 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 	private final ConfDespachoJdbcRepository confDespachoJdbcRepository;
 	private final PedidoTrasladoJdbcRepository pedidoTrasladoJdbcRepository;
 	private final CatalogJdbcRepository catalogJdbcRepository;
+	private final String ESTATUS_EXITOSO_SAP="S";
+	private static final Logger logger = LoggerFactory.getLogger(ConfDespachoJdbcRepositoryAdapter.class);
 
 	public ConfDespachoJdbcRepositoryAdapter(ConfirmacionDespachoSapClientAdapter confDespachoSapClientAdapter,
 			ConfDespachoJdbcRepository confDespachoJdbcRepository,
@@ -55,6 +59,7 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 					response.setMensaje(responseObj.getT_RETURN().get(0).getMessage());
 					if (result.get("estatus").equals("0")) {
 						response.setId(result.get("id"));
+						response.setMensaje(result.get("folio"));
 						this.catalogJdbcRepository.restaCantidadStockSilo(pesoNeto,req.getClaveSilo(),-1);
 						pedidoTrasladoJdbcRepository.restaCantidadPedTraslado(pesoNeto, req.getNumPedidoTraslado(), 1);
 					} else {
@@ -70,18 +75,22 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 				return response;
 			}
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.save: "+e.getMessage());
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.save: "+e.getCause());
 			response.setCode("ERRO-C-001");
 			response.setNumeroSap("");
 			response.setMensaje(e.getMessage());
 		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.save: "+e.getMessage());
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.save: "+e.getCause());
 			response.setCode("ERRO-C-002");
 			response.setNumeroSap("");
 			response.setMensaje(e.getMessage());
 		}
+		/*Map<String, String> result = this.confDespachoJdbcRepository.registroConfDespacho(req,"63535","S");
+		response.setId(result.get("id"));
+		response.setMensaje(result.get("folio"));
+		response.setCode("S");*/
 		return response;
 	}
 	
@@ -93,6 +102,7 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 	public ConfirmacionDespachoResponse updateSap(ConfirmacionDespachoRequest req) {
 		ConfirmacionDespachoResponse response = new ConfirmacionDespachoResponse();
 		boolean isSuma=false;
+		Float pesoNetoResult=0.0F;
 		try {
 			Float pesoNeto = req.getPesoBruto() - req.getPesoTara();
 			Float pesoNetoOld = req.getPesoBruto() - req.getPesoTara();
@@ -100,8 +110,9 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 			Float pesoNetoOldSinModified=0.0F;
 			String jsonResponse="";
 			if(req.getTipoMovimiento().equals("352")) {
-				pesoNetoOld=this.confDespachoJdbcRepository.findPesoNetoByIdPedtraslado(req.getIdconfDespacho());
+				pesoNetoOld=this.confDespachoJdbcRepository.findPesoNetoByIdPedtraslado(req.getIdConfDespacho());
 				pesoNetoOldSinModified=pesoNetoOld;
+				pesoNetoResult=pesoNetoOldSinModified;
 				if(pesoNeto!=null && pesoNetoOld!=null) {
 					isSuma=this.isSuma(pesoNetoOld, pesoNeto);
 				}
@@ -116,6 +127,7 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 				jsonResponse = this.confDespachoSapClientAdapter.sendConfirmacionDespacho(req.getClaveSilo(),
 						req.getClaveMaterial(), req.getNumPedidoTraslado(), req.getTipoMovimiento(), req.getNumBoleta(),
 						pesoNeto.toString(), req.getClaveDestino(), "");
+				pesoNetoResult=pesoNeto;
 			}
 			if (jsonResponse != null) {
 				ObjectMapper mapper = new ObjectMapper();
@@ -126,11 +138,18 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 				response.setCode(codeResponse);
 				response.setNumeroSap(numeroSap);
 				response.setMensaje(mensajeSap);
-				if (codeResponse.equals("S")) {
+				if (codeResponse.equals(ESTATUS_EXITOSO_SAP)) {
 					Map<String, String> result = this.confDespachoJdbcRepository.updateConfDespacho(req, numeroSap,
 							codeResponse);
 					if (result.get("estatus").equals("0")) {
 						response.setCode("0");
+						logger.info("=============== TRANSACCION REGISTRO CON SAP ================");
+						logger.info("TIPO MOVIMIENTO: "+req.getTipoMovimiento());
+						logger.info("PESO NETO: "+pesoNetoResult);
+						logger.info("NUMERO PEDIDO TRASLADO: "+req.getNumPedidoTraslado());
+						logger.info("SILO: "+req.getClaveSilo());
+						logger.info("MATERIAL: "+req.getClaveMaterial());
+						logger.info("===============================================");
 						if(!isSuma) {
 							pedidoTrasladoJdbcRepository.sumaCantidadPedTraslado(differencia, req.getNumPedidoTraslado(), 1);
 							this.catalogJdbcRepository.restaCantidadStockSilo(differencia,req.getClaveSilo(),-1);
@@ -151,18 +170,21 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 				return response;
 			}
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.updateSap: "+e.getMessage());
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.updateSap: "+e.getCause());
 			response.setCode("ERRO-C-001");
 			response.setNumeroSap("");
 			response.setMensaje(e.getMessage());
 		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.updateSap: "+e.getMessage());
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.updateSap: "+e.getCause());
 			response.setCode("ERRO-C-002");
 			response.setNumeroSap("");
 			response.setMensaje(e.getMessage());
 		}
+		/*Map<String, String> result = this.confDespachoJdbcRepository.updateConfDespacho(req, "00000023",
+				"S");
+		response.setCode("0");*/
 		return response;
 	}
 
@@ -173,10 +195,16 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 		try {
 			Map<String, String> result = this.confDespachoJdbcRepository.updateConfDespachoSinSap(req, "");
 			response.setCode(result.get("estatus"));
+			logger.info("=============== TRANSACCION REGISTRO SIN SAP ================");
+			logger.info("TIPO MOVIMIENTO: "+req.getTipoMovimiento());
+			logger.info("NUMERO PEDIDO TRASLADO: "+req.getNumPedidoTraslado());
+			logger.info("SILO: "+req.getClaveSilo());
+			logger.info("MATERIAL: "+req.getClaveMaterial());
+			logger.info("===============================================");
 			return response;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.updateBd: "+e.getMessage());
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.updateBd: "+e.getCause());
 			response.setCode("ERRO-C-002");
 			response.setNumeroSap("");
 			response.setMensaje(e.getMessage());
@@ -199,8 +227,8 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 			}
 			return response;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.esIgualPesosPorId: "+e.getMessage());
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.esIgualPesosPorId: "+e.getCause());
 			response.setCode("ERRO-C-002");
 			response.setNumeroSap("");
 			response.setMensaje(e.getMessage());
@@ -225,7 +253,7 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 		try {
 			Float pesoNetoOld = 0.0f;
 			String jsonResponse="";
-			pesoNetoOld=this.confDespachoJdbcRepository.findPesoNetoByIdPedtraslado(req.getIdconfDespacho());
+			pesoNetoOld=this.confDespachoJdbcRepository.findPesoNetoByIdPedtraslado(req.getIdConfDespacho());
 			if(pesoNetoOld==null) {
 				return response;
 			}
@@ -243,16 +271,9 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 				response.setMensaje(mensajeSap);
 				if (codeResponse.equals("S")) {
 					//int eliminado=1;
-					int eliminado=this.confDespachoJdbcRepository.deleteById(req.getIdconfDespacho());
+					int eliminado=this.confDespachoJdbcRepository.deleteById(req.getIdConfDespacho());
 					if (eliminado!=0) {
 						pedidoTrasladoJdbcRepository.sumaCantidadPedTraslado(pesoNetoOld, req.getNumPedidoTraslado(), 1);
-						/*if(!isSuma) {
-							pedidoTrasladoJdbcRepository.sumaCantidadPedTraslado(pesoNetoOld, req.getNumPedidoTraslado(), 1);
-							this.catalogJdbcRepository.restaCantidadStockSilo(pesoNetoOld,req.getClaveSilo(),-1);
-						}else {
-							pedidoTrasladoJdbcRepository.restaCantidadPedTraslado(pesoNetoOld, req.getNumPedidoTraslado(), 1);
-							this.catalogJdbcRepository.sumaCantidadStockSilo(pesoNetoOld,req.getClaveSilo(),-1);
-						}*/
 					}else {
 						response.setCode("-1");
 						response.setMensaje("Hubo un error al eliminar la confirmacion despacho");
@@ -265,14 +286,14 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 				return response;
 			}
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.delete: "+e.getMessage());
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.delete: "+e.getCause());
 			response.setCode("ERRO-C-001");
 			response.setNumeroSap("");
 			response.setMensaje(e.getMessage());
 		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.delete: "+e.getMessage());
+			logger.error("ERROR EN METODO ConfDespachoJdbcRepositoryAdapter.delete: "+e.getCause());
 			response.setCode("ERRO-C-002");
 			response.setNumeroSap("");
 			response.setMensaje(e.getMessage());

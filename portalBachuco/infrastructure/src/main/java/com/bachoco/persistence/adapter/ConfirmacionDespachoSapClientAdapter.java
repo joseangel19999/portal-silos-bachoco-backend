@@ -59,8 +59,8 @@ public class ConfirmacionDespachoSapClientAdapter implements ConfirmacionDespach
             }
             return readResponse(conn);
         } catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+        	logger.error("ERROR EN METODO ConfirmacionDespachoSapClientAdapter.sendConfirmacionDespacho: "+e.getMessage());
+        	logger.error("ERROR EN METODO ConfirmacionDespachoSapClientAdapter.sendConfirmacionDespacho: "+e.getCause());
 			throw new SapConnectionException("Hubo error en conexion a SAP: "+e.getCause());
 		} finally {
             conn.disconnect();
@@ -78,13 +78,12 @@ public class ConfirmacionDespachoSapClientAdapter implements ConfirmacionDespach
 		requestMap.put("I_PONUMBER",claveNumPedTraslado);
 		requestMap.put("I_CANTIDAD", pesoNeto);
 		requestMap.put("I_MOVIMIENTO",claveMovimiento);
-		logger.info("=============== TRANSACCION SAP ================");
-		logger.info("TIPO MOVIMIENTO: "+claveMovimiento);
-		logger.info("PESO NETO: "+pesoNeto);
-		logger.info("NUMERO PEDIDO TRASLADO: "+claveNumPedTraslado);
-		logger.info("SILO: "+claveSilo);
-		logger.info("MATERIAL: "+claveMaterial);
-		logger.info("===============================================");
+		logger.info("====================== CONFIRMACION DESPACHO ====================");
+		logger.info(" PEDIDO TRASLADO: "+claveNumPedTraslado);
+		logger.info(" CLAVE MATERIAL : "+claveMaterial);
+		logger.info(" PESO NETO: "+pesoNeto);
+		logger.info(" SILO: "+claveSilo);
+		logger.info("=================================================================");
 		return mapper.writeValueAsString(requestMap);
 	}
 	
@@ -93,9 +92,6 @@ public class ConfirmacionDespachoSapClientAdapter implements ConfirmacionDespach
 	                .encodeToString((sapProperties.getUserName() + ":" + sapProperties.getPassWord()).getBytes(StandardCharsets.UTF_8));
 	        conn.setRequestProperty("Authorization", "Basic " + encodedAuth);
 	    }
-	    // ======================
-	    // MÉTODO AUXILIAR: Lectura respuesta
-	    // ======================
 	    private String readResponse(HttpURLConnection conn) throws IOException {
 	        int status = conn.getResponseCode();
 	        InputStream inputStream = (status >= 200 && status < 300)

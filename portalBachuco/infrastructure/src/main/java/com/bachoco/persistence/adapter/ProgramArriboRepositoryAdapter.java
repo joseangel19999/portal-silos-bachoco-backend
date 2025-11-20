@@ -38,7 +38,7 @@ public class ProgramArriboRepositoryAdapter implements ProgramArriboRepositoryPo
 	@Override
 	public Double stockSilo(String claveSilo,String material) {
 		Double response=this.programArriboSapRepositoryPor.stockSilo(claveSilo,material, sapProperties.getUrl());
-		//Double response=3450488.00D;
+		//Double response=2000D;
 		if(response!=null) {
 			this.catalogJdbcRepository.resetStockSilo(String.valueOf(response), claveSilo,1);
 			return response;
@@ -46,13 +46,6 @@ public class ProgramArriboRepositoryAdapter implements ProgramArriboRepositoryPo
 			this.catalogJdbcRepository.resetStockSilo(String.valueOf("0"), claveSilo,1);
 			return 0.0D;
 		}
-		/*Optional<SiloEntity> opt=this.siloJpaRepository.findBySilo(claveSilo);
-		if(opt.isPresent()) {
-			return opt.get().getStock().doubleValue();
-		}else {
-			return null;
-		}
-		return response;*/
 	}
 
 	@Override

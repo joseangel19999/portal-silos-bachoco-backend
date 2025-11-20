@@ -30,7 +30,8 @@ public class ConfirmDespachoRowMapper implements RowMapper<ConfirmDespachoRespon
                 rs.getString("tipoMovimiento"),
                 rs.getString("idconfDespacho"),
                 rs.getString("idPedTraslado"),
-                rs.getString("numeroSap")
+                rs.getString("numeroSap"),
+                rs.getString("FOLIO")
             );
         }
 }

@@ -2,7 +2,7 @@ package com.bachoco.model;
 
 public class PedidoTrasladoSapResponseDTO {
 
-	  private String numeroPedTraslado;
+	    private String numeroPedTraslado;
 	    private String plantaDestino;
 	    private String cantidaddespacho;
 	    private String cantidadPedido;
