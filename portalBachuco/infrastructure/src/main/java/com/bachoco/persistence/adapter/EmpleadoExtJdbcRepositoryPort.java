@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.bachoco.model.EmpleadoExternoRequest;
 import com.bachoco.model.EmpleadoExternoResponse;
-import com.bachoco.persistence.repository.EmpleadoExternoJdbcRepository;
+import com.bachoco.persistence.repository.jdbc.EmpleadoExternoJdbcRepository;
 import com.bachoco.port.EmpleadoExternoRepositoryPort;
 
 @Component
@@ -21,10 +21,16 @@ public class EmpleadoExtJdbcRepositoryPort implements EmpleadoExternoRepositoryP
 
 	@Override
 	public Optional<EmpleadoExternoResponse> save(EmpleadoExternoRequest req) {
-		EmpleadoExternoResponse response=empleadoExternoRepository.save(req);
-		if(response!=null) {
-			return Optional.ofNullable(response);
+		Optional<EmpleadoExternoResponse> empleado=this.findByCorreo(req.getCorreo());
+		if(empleado.isEmpty()) {
+			EmpleadoExternoResponse response=empleadoExternoRepository.save(req);
+			if(response!=null) {
+				return Optional.ofNullable(response);
+			}
+		}else {
+			
 		}
+
 		return Optional.empty();
 	}
 
@@ -54,7 +60,12 @@ public class EmpleadoExtJdbcRepositoryPort implements EmpleadoExternoRepositoryP
 
 	@Override
 	public void delete(Integer id) {
-		this.empleadoExternoRepository.delete(id);
+		this.empleadoExternoRepository.eliminarEmpleadoCompleto(id);
+	}
+
+	@Override
+	public List<Integer> findAllIdEmpleadoBaja() {
+		return this.empleadoExternoRepository.findAllEmpExternoBaja();
 	}
 	
 }

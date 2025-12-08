@@ -13,7 +13,7 @@ public class BatchUtils {
 
         for (int i = 0; i < list.size(); i += batchSize) {
             int end = Math.min(i + batchSize, list.size());
-            List<T> subList = new ArrayList<>(list.subList(i, end)); // 🔹 Copia real
+            List<T> subList = new ArrayList<>(list.subList(i, end));
             partitions.add(subList);
         }
         return partitions;

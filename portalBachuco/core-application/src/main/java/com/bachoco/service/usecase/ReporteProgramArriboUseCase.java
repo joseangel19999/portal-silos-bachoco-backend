@@ -16,5 +16,4 @@ public class ReporteProgramArriboUseCase {
 	public List<ReportePorgramArribo> findAll(Integer siloId,String fechaI,String fechaF){
 		return this.programArriboPort.findAllFilters(siloId, fechaI, fechaF);
 	}
-
 }

@@ -1,18 +1,13 @@
 package com.bachoco.persistence.adapter;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.bachoco.model.ProgramArriboRequest;
 import com.bachoco.persistence.config.SapProperties;
-import com.bachoco.persistence.entity.SiloEntity;
-import com.bachoco.persistence.repository.CatalogJdbcRepository;
-import com.bachoco.persistence.repository.ProgramArriboJdbcRepository;
 import com.bachoco.persistence.repository.SiloJpaRepository;
+import com.bachoco.persistence.repository.jdbc.CatalogJdbcRepository;
+import com.bachoco.persistence.repository.jdbc.ProgramArriboJdbcRepository;
 import com.bachoco.port.ProgramArriboRepositoryPort;
 import com.bachoco.port.ProgramArriboSapRepositoryPort;
 
@@ -51,6 +46,12 @@ public class ProgramArriboRepositoryAdapter implements ProgramArriboRepositoryPo
 	@Override
 	public String saveProgramArrivo(List<ProgramArriboRequest> arribos) {
 		return this.programArriboJdbcRepository.saveProgramArribo(arribos);
+	}
+
+	@Override
+	public Float findPesoNetoByNumPedTraslado(List<String> numPedidoTraslados, String claveSilo,
+			String claveMaterial, String clavePlanta, String fechaInicio, String fechaFin) {
+		return this.catalogJdbcRepository.totalProgramArriboByPedTraslado(numPedidoTraslados, claveSilo, claveMaterial, clavePlanta, fechaInicio, fechaFin);
 	}
 
 }

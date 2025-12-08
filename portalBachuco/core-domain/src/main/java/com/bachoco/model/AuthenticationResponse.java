@@ -1,6 +1,7 @@
 package com.bachoco.model;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 public class AuthenticationResponse {
 	
@@ -8,6 +9,7 @@ public class AuthenticationResponse {
 	private String usuario;
 	private String password;
 	private String correo;
+	private Set<String> roles;
 	private Integer usuarioTipo;
 	private Integer usuarioActivo;
 	private Integer empleadoActivo;
@@ -79,4 +81,14 @@ public class AuthenticationResponse {
 	public void setUltimoModifiPwd(LocalDateTime ultimoModifiPwd) {
 		this.ultimoModifiPwd = ultimoModifiPwd;
 	}
+
+	public Set<String> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(Set<String> roles) {
+		this.roles = roles;
+	}
+	
+	
 }

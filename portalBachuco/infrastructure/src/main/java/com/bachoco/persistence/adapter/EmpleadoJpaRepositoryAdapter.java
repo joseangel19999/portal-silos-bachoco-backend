@@ -20,10 +20,10 @@ import com.bachoco.persistence.entity.EmpleadoEntity;
 import com.bachoco.persistence.entity.EmpleadoInternoEntity;
 import com.bachoco.persistence.entity.PerfilEntity;
 import com.bachoco.persistence.entity.UsuarioEntity;
-import com.bachoco.persistence.repository.CatalogJdbcRepository;
 import com.bachoco.persistence.repository.EmpleadoInternoJpaRepository;
 import com.bachoco.persistence.repository.EmpleadoJpaRepository;
 import com.bachoco.persistence.repository.UsuarioJpaRepository;
+import com.bachoco.persistence.repository.jdbc.CatalogJdbcRepository;
 import com.bachoco.port.EmpleadoRepositoryPort;
 
 @Repository

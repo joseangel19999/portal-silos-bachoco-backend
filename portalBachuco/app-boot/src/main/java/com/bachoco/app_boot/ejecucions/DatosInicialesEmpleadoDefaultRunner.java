@@ -76,7 +76,8 @@ public class DatosInicialesEmpleadoDefaultRunner implements CommandLineRunner {
 	    	}
 	    } catch (Exception e) {
 	        // Manejo de excepción adecuado: registra el error y relanza.
-	        logger.info("ERROR al registrar al empleado Administrador: " + e.getMessage());
+	        logger.error("ERROR al registrar al empleado Administrador: " + e.getMessage());
+	        logger.error("ERROR al registrar al empleado Administrador causa: " + e.getCause());
 	    }
 	}
 

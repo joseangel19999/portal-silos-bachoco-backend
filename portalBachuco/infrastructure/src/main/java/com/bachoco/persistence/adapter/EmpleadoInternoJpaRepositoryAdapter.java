@@ -16,10 +16,10 @@ import com.bachoco.persistence.entity.DepartamentoEntity;
 import com.bachoco.persistence.entity.EmpleadoInternoEntity;
 import com.bachoco.persistence.entity.PuestoEntity;
 import com.bachoco.persistence.repository.DepartamentoJpaRepository;
-import com.bachoco.persistence.repository.EmpleadoInternoJdbcRepository;
 import com.bachoco.persistence.repository.EmpleadoInternoJpaRepository;
 import com.bachoco.persistence.repository.EmpleadoJpaRepository;
 import com.bachoco.persistence.repository.PuestoJpaRepository;
+import com.bachoco.persistence.repository.jdbc.EmpleadoInternoJdbcRepository;
 import com.bachoco.port.EmpleadoInternoRepositoryPort;
 
 @Repository
@@ -94,11 +94,16 @@ public class EmpleadoInternoJpaRepositoryAdapter implements EmpleadoInternoRepos
 	
 	@Override
 	public void delete(Integer id) {
-		this.empInternoJdbcRepository.delete(id);
+		this.empInternoJdbcRepository.eliminarEmpleadoCompleto(id);
 	}
 
 	@Override
 	public void update(Integer id,EmpleadoInternoRequest request) {
 		this.empInternoJdbcRepository.update(id,request);
+	}
+
+	@Override
+	public List<Integer> findAllIdEmpleadoBaja() {
+		return this.empInternoJdbcRepository.findAllEmpInternoBaja();
 	}
 }

@@ -55,7 +55,7 @@ public class DatosInicialesDeptoRunner implements CommandLineRunner{
 	            logger.info("Se registraron " + nuevosDepartamentos.size() + " nuevos departamentos.");
 	        } catch (Exception e) {
 	            // **Crucial**: Manejo de excepción adecuado. ¡No ignores los errores!
-	            System.err.println("ERROR: No se pudieron registrar los departamentos: " + e.getMessage());
+	        	logger.warn("ERROR: No se pudieron registrar los departamentos: " + e.getMessage());
 	        }
 	    } else {
 	        logger.info("Todos los departamentos iniciales ya existen. No se registró nada.");

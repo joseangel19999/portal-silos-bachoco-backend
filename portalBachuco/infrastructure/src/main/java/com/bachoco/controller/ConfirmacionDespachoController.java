@@ -11,7 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,19 +40,19 @@ public class ConfirmacionDespachoController {
 		this.confirmacionDespachoUseCase = confirmacionDespachoUseCase;
 	}
 
-	@PostMapping
+	@PostMapping//registra una confirmacion despacho con movimiento 351
 	public ResponseEntity<ConfirmacionDespachoResponse> save(@RequestBody ConfirmacionDespachoRequest req){
 		ConfirmacionDespachoResponse response =this.confirmacionDespachoUseCase.save(req);
 		return new ResponseEntity<ConfirmacionDespachoResponse>(response,HttpStatus.OK);
 	}
 	
-	@PutMapping("/update-sap")
+	@PutMapping("/update-sap")//actualiza la confirmacion despacho con movimiento de sap 351 y 352
 	public ResponseEntity<ConfirmacionDespachoResponse> updateSap(@RequestBody ConfirmacionDespachoRequest req){
 		ConfirmacionDespachoResponse response =this.confirmacionDespachoUseCase.updateSap(req);
 		return new ResponseEntity<ConfirmacionDespachoResponse>(response,HttpStatus.OK);
 	}
 	
-	@PutMapping("/update-sin-sap")
+	@PutMapping("/update-sin-sap")//actualiza la confirmacion despacho sin movimientos a sap 
 	public ResponseEntity<ConfirmacionDespachoResponse> updateSinSap(@RequestBody ConfirmacionDespachoRequest req){
 		ConfirmacionDespachoResponse response =this.confirmacionDespachoUseCase.updateSinSap(req);
 		return new ResponseEntity<ConfirmacionDespachoResponse>(response,HttpStatus.OK);
@@ -65,7 +64,7 @@ public class ConfirmacionDespachoController {
 		List<ConfirmDespachoResponse>  response =this.confirmacionDespachoUseCase.findAllConfirmacionDespacho(silo,material,fechaInicio,fechaFin);
 		return new ResponseEntity<List<ConfirmDespachoResponse>> (response,HttpStatus.OK);
 	}
-	@GetMapping("/filters-pesos")
+	@GetMapping("/filters-pesos")//calcula el peso neto de la confirmacion despacho que cambio el peso tara o bruto para decidir si hacer un 351 y 352
 	public ResponseEntity<ConfirmacionDespachoResponse> validatePesos(@RequestParam Integer id,
 			@RequestParam Float pesobruto,@RequestParam Float pesotara){
 		ConfDespachoPesosRequest req=new ConfDespachoPesosRequest();
@@ -82,7 +81,7 @@ public class ConfirmacionDespachoController {
 	}
 	
 	
-	@GetMapping("/dowload-pdf/{id}")
+	@GetMapping("/dowload-pdf/{id}")//genera reporte en pdf de la confirmacion despacho
     public ResponseEntity<Resource> descargarReporte(@PathVariable Integer id) throws IOException {
         try {
         	ByteArrayOutputStream data=this.reporteConfDespachoService.generarPdfBoleta(id);
@@ -102,7 +101,7 @@ public class ConfirmacionDespachoController {
         }
     }
 	
-	@PostMapping("/delete")
+	@PostMapping("/delete")//elimina la confirmacion despacho
 	public ResponseEntity<ConfirmacionDespachoResponse> delete(@RequestBody ConfirmacionDespachoRequest req){
 		ConfirmacionDespachoResponse response =this.confirmacionDespachoUseCase.delete(req);
 		return new ResponseEntity<ConfirmacionDespachoResponse>(response,HttpStatus.OK);

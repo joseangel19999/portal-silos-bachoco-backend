@@ -27,7 +27,6 @@ public class OtpJpaAdapter implements OtpRepository{
 
 	@Override
 	public Optional<Otp> findByUsuarioIdAndCodigo(String usuarioId, String codigo) {
-		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 	

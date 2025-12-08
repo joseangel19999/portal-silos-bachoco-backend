@@ -1,8 +1,6 @@
 package com.bachoco.persistence.adapter;
 
 import java.util.Optional;
-
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,7 +13,7 @@ import com.bachoco.exception.OtpInvalidException;
 import com.bachoco.exception.PasswordExpirationException;
 import com.bachoco.exception.SendEmailException;
 import com.bachoco.model.AuthenticationResponse;
-import com.bachoco.persistence.repository.CatalogJdbcRepository;
+import com.bachoco.persistence.repository.jdbc.CatalogJdbcRepository;
 import com.bachoco.port.AuthenticationPort;
 import com.bachoco.port.OtpRepository;
 import com.bachoco.port.PasswordEncoderPort;
@@ -50,7 +48,6 @@ public class AuthenticationAdapter implements AuthenticationPort {
 
 	@Override
 	public String authenticate(String username, String password) {
-		//var usuario = usuarioJpaRepository.findByUsuario(username);
 		Optional<AuthenticationResponse> auth = this.catalogJdbcRepository.authResponse(username);
 		if (auth.isEmpty()) {
 			throw new CredencialesInvalidasException();
@@ -99,7 +96,7 @@ public class AuthenticationAdapter implements AuthenticationPort {
 
 	@Override
 	public Boolean passwordExpiration(String username) {
-		return null;//PasswordExpirationException
+		return null;
 	}
 
 }

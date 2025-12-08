@@ -65,7 +65,6 @@ public class BodegaJpaRepositoryAdapter implements BodegaRepositoryPort{
 
 	@Override
 	public Bodega findByCodigo(String codigo) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

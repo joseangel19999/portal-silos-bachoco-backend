@@ -20,7 +20,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import com.bachoco.security.filter.JwtAuthenticationFilter;
-import com.bachoco.secutiry.utils.SecurityTextUtils;
 
 @Configuration
 @EnableWebSecurity

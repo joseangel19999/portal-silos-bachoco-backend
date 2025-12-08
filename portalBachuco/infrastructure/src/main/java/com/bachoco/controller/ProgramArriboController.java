@@ -46,6 +46,14 @@ public class ProgramArriboController {
 		return new ResponseEntity<List<PedidoTrasladoArriboDTO>>(response,HttpStatus.OK);
 	}
 	
+	@GetMapping("/findTotal-ProgramArriboByNumPedTraslado")
+	public ResponseEntity<Float> findPesoNetoByNumPedTraslado(
+			@RequestParam String numPedidoTraslados, @RequestParam String claveSilo,@RequestParam String claveMaterial,@RequestParam String clavePlanta,
+			@RequestParam String fechaInicio,@RequestParam String fechaFin){
+		Float response=this.programArriboUseCase.findPesoNetoByNumPedTraslado(List.of(numPedidoTraslados.split(",")), claveSilo,claveMaterial,clavePlanta, fechaInicio,fechaFin);
+		return new ResponseEntity<Float>(response,HttpStatus.OK);
+	}
+	
 	@PostMapping
 	public ResponseEntity<Void> saveProgramArivo(@RequestBody List<ProgramArriboRequest> req){
 		String response=this.programArriboUseCase.saveProgramArribo(req);

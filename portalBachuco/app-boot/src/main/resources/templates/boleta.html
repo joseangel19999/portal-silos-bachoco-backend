@@ -97,7 +97,7 @@
 				<p style="font-size: 12pt; font-weight: bold;" th:text="${boleta.nombreSilo}">(CLIENTE)</p>
 				<p style="font-size: 8pt; margin: 0;">Proveedor del silo</p>
 				<p style="font-size: 14pt; font-weight: bold; margin: 10px 0;">
-					BOLETA DE SALIDA No. <span th:text="${boleta.numeroBoleta}">161</span>
+					BOLETA DE SALIDA No. <span th:text="${boleta.folio}">161</span>
 				</p>
 			</div>
 		</div>
@@ -117,6 +117,10 @@
 				<p style="font-weight: bold;"><span class="data-label">PESO NETO:</span> <span
 						th:text="${#numbers.formatDecimal(boleta.pesoNeto, 1, 2)}">40.020</span> TON</p>
 				<p><span class="data-label">HUMEDAD:</span> <span th:text="${#numbers.formatDecimal(boleta.humedad, 1, 2)} + ' %'"></span></p>
+				<p><span class="data-label">NOMBRE DEL CHOFER:</span> <span th:text="${boleta.chofer}"></span></p>
+				<p><span class="data-label">LÍNEA TRANSPORTISTA:</span> <span th:text="${boleta.transportista}"></span></p>
+				<p><span class="data-label">PLACAS DE LA UNIDAD:</span> <span th:text="${boleta.placasVehiculo}"></span></p>
+				<p><span class="data-label">NÚMERO DE BOLETA DE EMBARQUE:</span> <span th:text="${boleta.numeroBoleta}"></span></p>
 			</div>
 
 

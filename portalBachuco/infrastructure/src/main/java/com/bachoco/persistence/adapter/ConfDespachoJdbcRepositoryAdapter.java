@@ -12,10 +12,12 @@ import com.bachoco.model.ConfDespachoPesosRequest;
 import com.bachoco.model.ConfirmDespachoResponse;
 import com.bachoco.model.ConfirmacionDespachoRequest;
 import com.bachoco.model.ConfirmacionDespachoResponse;
-import com.bachoco.persistence.repository.CatalogJdbcRepository;
-import com.bachoco.persistence.repository.ConfDespachoJdbcRepository;
-import com.bachoco.persistence.repository.PedidoTrasladoJdbcRepository;
+import com.bachoco.persistence.repository.jdbc.CatalogJdbcRepository;
+import com.bachoco.persistence.repository.jdbc.ConfDespachoJdbcRepository;
+import com.bachoco.persistence.repository.jdbc.PedidoTrasladoJdbcRepository;
 import com.bachoco.port.ConfirmacionDespachoJdbcRepository;
+import com.bachoco.port.ProgramArriboRepositoryPort;
+import com.bachoco.utils.ConfirmacionDespachoUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,50 +29,78 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 	private final ConfDespachoJdbcRepository confDespachoJdbcRepository;
 	private final PedidoTrasladoJdbcRepository pedidoTrasladoJdbcRepository;
 	private final CatalogJdbcRepository catalogJdbcRepository;
+	private final ProgramArriboRepositoryPort programArriboRepositoryPort;
 	private final String ESTATUS_EXITOSO_SAP="S";
+	private final String KEY_ID="id";
+	private final String KEY_FOLIO="folio";
+	private final String OPERACION_352="352";
+	private final String ESTATUS_CODE_FAIL_SAVE_BD="-2";
+	private final String ESTATUS_CODE_FAIL_SAP="-1";
+	private final String EMPTY="";
 	private static final Logger logger = LoggerFactory.getLogger(ConfDespachoJdbcRepositoryAdapter.class);
 
 	public ConfDespachoJdbcRepositoryAdapter(ConfirmacionDespachoSapClientAdapter confDespachoSapClientAdapter,
 			ConfDespachoJdbcRepository confDespachoJdbcRepository,
-			PedidoTrasladoJdbcRepository pedidoTrasladoJdbcRepository, CatalogJdbcRepository catalogJdbcRepository) {
+			PedidoTrasladoJdbcRepository pedidoTrasladoJdbcRepository, CatalogJdbcRepository catalogJdbcRepository,
+			ProgramArriboRepositoryPort programArriboRepositoryPor) {
 		this.confDespachoSapClientAdapter = confDespachoSapClientAdapter;
 		this.confDespachoJdbcRepository = confDespachoJdbcRepository;
 		this.pedidoTrasladoJdbcRepository = pedidoTrasladoJdbcRepository;
 		this.catalogJdbcRepository = catalogJdbcRepository;
+		this.programArriboRepositoryPort=programArriboRepositoryPor;
 	}
 
+	private SapResponse sapResponse(ConfirmacionDespachoRequest req,Float pesoNeto) throws JsonMappingException, JsonProcessingException {
+		String jsonResponse = this.confDespachoSapClientAdapter.sendConfirmacionDespacho(req.getClaveSilo(),
+				req.getClaveMaterial(), req.getNumPedidoTraslado(), req.getTipoMovimiento(), req.getNumBoleta(),
+				pesoNeto.toString(), req.getClaveDestino(), "");
+		if (jsonResponse != null) {
+			ObjectMapper mapper = new ObjectMapper();
+			SapResponse responseObj = mapper.readValue(jsonResponse, SapResponse.class);
+			return responseObj;
+		}
+		return null;
+	}
+	
+	private Float pesoTotalPedidoTraslado(List<String> numPedidoTraslados, String claveSilo,
+			String claveMaterial, String clavePlanta, String fechaInicio, String fechaFin) {
+		return this.programArriboRepositoryPort.findPesoNetoByNumPedTraslado(numPedidoTraslados, claveSilo, claveMaterial, clavePlanta, fechaInicio, fechaFin);
+	}
+	
+	//envia siempre 351 a sap y registra la confirmacion despacho en base de datos
 	@Override
 	public ConfirmacionDespachoResponse save(ConfirmacionDespachoRequest req) {
 		Float pesoNeto = req.getPesoBruto() - req.getPesoTara();
 		ConfirmacionDespachoResponse response = new ConfirmacionDespachoResponse();
 		try {
-			String jsonResponse = this.confDespachoSapClientAdapter.sendConfirmacionDespacho(req.getClaveSilo(),
-					req.getClaveMaterial(), req.getNumPedidoTraslado(), req.getTipoMovimiento(), req.getNumBoleta(),
-					pesoNeto.toString(), req.getClaveDestino(), "");
-			if (jsonResponse != null) {
-				ObjectMapper mapper = new ObjectMapper();
-				SapResponse responseObj = mapper.readValue(jsonResponse, SapResponse.class);
-				response.setCode(responseObj.getT_RETURN().get(0).getType());
-				response.setNumeroSap(String.valueOf(responseObj.getT_RETURN().get(0).getMessage_V1()));
-				if (response.getCode().equals("S")) {
+			Float pesoTotalProgramadoArribo=this.pesoTotalPedidoTraslado(List.of(req.getNumPedidoTraslado()),req.getClaveSilo(),
+					req.getClaveMaterial(),req.getClaveDestino(),EMPTY, EMPTY);
+			SapResponse sapResponse=sapResponse(req,pesoNeto);
+			if(sapResponse!=null) {
+				response.setCode(sapResponse.getT_RETURN().get(0).getType());
+				response.setNumeroSap(String.valueOf(sapResponse.getT_RETURN().get(0).getMessage_V1()));
+				if (response.getCode().equals(ESTATUS_EXITOSO_SAP)) {
+					
 					Map<String, String> result = this.confDespachoJdbcRepository.registroConfDespacho(req,
-							(String) responseObj.getT_RETURN().get(0).getMessage_V1(),
-							responseObj.getT_RETURN().get(0).getType());
-					response.setMensaje(responseObj.getT_RETURN().get(0).getMessage());
-					if (result.get("estatus").equals("0")) {
-						response.setId(result.get("id"));
-						response.setMensaje(result.get("folio"));
+							(String) sapResponse.getT_RETURN().get(0).getMessage_V1(),
+							sapResponse.getT_RETURN().get(0).getType());
+					response.setMensaje(sapResponse.getT_RETURN().get(0).getMessage());
+					
+					if (result.get(ConfirmacionDespachoUtil.VALUE_STATUS).equals(ConfirmacionDespachoUtil.VALUE_ZERO_STR)) {
+						response.setId(result.get(KEY_ID));
+						response.setMensaje(result.get(KEY_FOLIO));
 						this.catalogJdbcRepository.restaCantidadStockSilo(pesoNeto,req.getClaveSilo(),-1);
 						pedidoTrasladoJdbcRepository.restaCantidadPedTraslado(pesoNeto, req.getNumPedidoTraslado(), 1);
 					} else {
-						response.setCode("-2");
-						response.setId(result.get("id"));
+						response.setCode(ESTATUS_CODE_FAIL_SAVE_BD);
+						response.setId(result.get(KEY_ID));
 						response.setMensaje("Error al registrar la confirmacion despacho");
 					}
+					
 				}else {
-					response.setCode("-1");
-					response.setId("");
-					response.setMensaje(responseObj.getT_RETURN().get(0).getMessage());
+					response.setCode(ESTATUS_CODE_FAIL_SAP);
+					response.setId(EMPTY);
+					response.setMensaje(sapResponse.getT_RETURN().get(0).getMessage());
 				}
 				return response;
 			}
@@ -87,10 +117,6 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 			response.setNumeroSap("");
 			response.setMensaje(e.getMessage());
 		}
-		/*Map<String, String> result = this.confDespachoJdbcRepository.registroConfDespacho(req,"63535","S");
-		response.setId(result.get("id"));
-		response.setMensaje(result.get("folio"));
-		response.setCode("S");*/
 		return response;
 	}
 	
@@ -98,6 +124,7 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 		return pesoNetoOld<pesoNeto?true:false;
 	}
 
+	//actualiza la informacion en base de datos y envia 352 a sap con el peso neto anterior y luego tambien envia un 351 con el nuevo peso
 	@Override
 	public ConfirmacionDespachoResponse updateSap(ConfirmacionDespachoRequest req) {
 		ConfirmacionDespachoResponse response = new ConfirmacionDespachoResponse();
@@ -108,25 +135,26 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 			Float pesoNetoOld = req.getPesoBruto() - req.getPesoTara();
 			Float differencia=0F;
 			Float pesoNetoOldSinModified=0.0F;
-			String jsonResponse="";
-			if(req.getTipoMovimiento().equals("352")) {
+			String jsonResponse=EMPTY;
+			//352 cancela la confirmacion despacho enviando peso neto y 352
+			if(req.getTipoMovimiento().equals(OPERACION_352)) {
 				pesoNetoOld=this.confDespachoJdbcRepository.findPesoNetoByIdPedtraslado(req.getIdConfDespacho());
 				pesoNetoOldSinModified=pesoNetoOld;
 				pesoNetoResult=pesoNetoOldSinModified;
 				if(pesoNeto!=null && pesoNetoOld!=null) {
 					isSuma=this.isSuma(pesoNetoOld, pesoNeto);
 				}
-				//isSuma=this.isSuma(pesoNetoOld, pesoNeto);
 				if(pesoNetoOld!=null) {
 					differencia= Math.abs(pesoNeto-pesoNetoOld);
 				}
 				jsonResponse=this.confDespachoSapClientAdapter.sendConfirmacionDespacho(req.getClaveSilo(),
 						req.getClaveMaterial(), req.getNumPedidoTraslado(), req.getTipoMovimiento(), req.getNumBoleta(),
-						pesoNetoOldSinModified.toString(), req.getClaveDestino(), "");
+						pesoNetoOldSinModified.toString(), req.getClaveDestino(),EMPTY);
 			}else {
+				//envia 351 con el peso neto nuevo
 				jsonResponse = this.confDespachoSapClientAdapter.sendConfirmacionDespacho(req.getClaveSilo(),
 						req.getClaveMaterial(), req.getNumPedidoTraslado(), req.getTipoMovimiento(), req.getNumBoleta(),
-						pesoNeto.toString(), req.getClaveDestino(), "");
+						pesoNeto.toString(), req.getClaveDestino(),EMPTY);
 				pesoNetoResult=pesoNeto;
 			}
 			if (jsonResponse != null) {
@@ -159,13 +187,13 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 						}
 						
 					}else {
-						response.setCode("-1");
+						response.setCode(ESTATUS_CODE_FAIL_SAVE_BD);
 						response.setMensaje("Hubo un error al actualizar la confirmacion despacho");
 					}
 				}else {
-					response.setCode("-1");
+					response.setCode(ESTATUS_CODE_FAIL_SAP);
 					response.setId("");
-					response.setMensaje("Error al registrar la confirmacion despacho");
+					response.setMensaje("Error al registrar la confirmacion despacho en sap");
 				}
 				return response;
 			}
@@ -182,15 +210,12 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 			response.setNumeroSap("");
 			response.setMensaje(e.getMessage());
 		}
-		/*Map<String, String> result = this.confDespachoJdbcRepository.updateConfDespacho(req, "00000023",
-				"S");
-		response.setCode("0");*/
 		return response;
 	}
 
+	//actualiza solo la informacion de la base de datos de confirmacion despacho sin cambio en pesos netos
 	@Override
 	public ConfirmacionDespachoResponse updateBd(ConfirmacionDespachoRequest req) {
-		Float pesoNeto = req.getPesoBruto() - req.getPesoTara();
 		ConfirmacionDespachoResponse response = new ConfirmacionDespachoResponse();
 		try {
 			Map<String, String> result = this.confDespachoJdbcRepository.updateConfDespachoSinSap(req, "");
@@ -212,6 +237,7 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 		return response;
 	}
 
+	//valida que no hubo cambio de pesos neto cuando se modifica una confirmacion despacho 
 	@Override
 	public ConfirmacionDespachoResponse esIgualPesosPorId(ConfDespachoPesosRequest req) {
 		ConfirmacionDespachoResponse response = new ConfirmacionDespachoResponse();
@@ -247,6 +273,7 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 		return this.confDespachoJdbcRepository.findAllConfirmacionesDespacho(silo,material,fechaInicio,fechaFin);
 	}
 
+	//envia 352 con el peso neto para cancelar la confimacion despacho
 	@Override
 	public ConfirmacionDespachoResponse delete(ConfirmacionDespachoRequest req) {
 		ConfirmacionDespachoResponse response = new ConfirmacionDespachoResponse();
@@ -269,19 +296,19 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 				response.setCode(codeResponse);
 				response.setNumeroSap(numeroSap);
 				response.setMensaje(mensajeSap);
-				if (codeResponse.equals("S")) {
-					//int eliminado=1;
+				if (codeResponse.equals(ESTATUS_EXITOSO_SAP)) {
+					//despues que hubo cancelacion exitosa de sap, se tiene que eliminar el registro en la base de datos y se tiene que sumar nuevamente el stock
 					int eliminado=this.confDespachoJdbcRepository.deleteById(req.getIdConfDespacho());
 					if (eliminado!=0) {
 						pedidoTrasladoJdbcRepository.sumaCantidadPedTraslado(pesoNetoOld, req.getNumPedidoTraslado(), 1);
 					}else {
-						response.setCode("-1");
+						response.setCode(ESTATUS_CODE_FAIL_SAVE_BD);
 						response.setMensaje("Hubo un error al eliminar la confirmacion despacho");
 					}
 				}else {
-					response.setCode("-1");
+					response.setCode(ESTATUS_CODE_FAIL_SAP);
 					response.setId("");
-					response.setMensaje("Error al eliminar la confirmacion despacho");
+					response.setMensaje("Error al eliminar la confirmacion despacho: "+mensajeSap);
 				}
 				return response;
 			}
@@ -300,4 +327,5 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 		}
 		return response;
 	}
+	
 }

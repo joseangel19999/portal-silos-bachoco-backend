@@ -24,19 +24,19 @@ public class CustomUserDetailsService implements UserDetailsService{
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Usuario usuario = usuarioRepositoryPort.findByUsuario(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-		if(usuario.getPerfiles()!=null) {
-			var roles=usuario.getPerfiles().stream()
-	                .map(role -> role.getClave())
+		if(usuario.getRoles()!=null) {
+			var roles=usuario.getRoles().stream()
+	                .map(role -> role)
 	                .collect(Collectors.joining(","));
 	        return org.springframework.security.core.userdetails.User.builder()
 	                .username(usuario.getUsuario())
-	                .password(usuario.getPassword()) // La contraseña ya está encriptada
+	                .password(usuario.getPassword())
 	                .roles(roles)
 	                .build();
 		}else {
 	        return org.springframework.security.core.userdetails.User.builder()
 	                .username(usuario.getUsuario())
-	                .password(usuario.getPassword()) // La contraseña ya está encriptada
+	                .password(usuario.getPassword())
 	                .build();
 		}
 	}

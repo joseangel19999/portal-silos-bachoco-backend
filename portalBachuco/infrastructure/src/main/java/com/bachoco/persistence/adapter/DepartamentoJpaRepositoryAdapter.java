@@ -19,7 +19,6 @@ public class DepartamentoJpaRepositoryAdapter implements DepartamentoRepositoryP
 		this.departamentoRepository = departamentoRepository;
 	}
 
-
 	@Override
 	public Departamento findById(Integer id) {
 		return toDomain(this.departamentoRepository.findById(id).get());
@@ -29,11 +28,8 @@ public class DepartamentoJpaRepositoryAdapter implements DepartamentoRepositoryP
 		return new Departamento(entity.getId(),entity.getNombre());
 	}
 
-
 	@Override
 	public List<Departamento> findAll() {
 		return this.departamentoRepository.findAll().stream().map(d->CatalogMapper.toDomain(d)).toList();
 	}
-
-	
 }

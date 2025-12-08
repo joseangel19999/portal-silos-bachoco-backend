@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 
 import com.bachoco.model.ReporteDespacho;
-import com.bachoco.persistence.repository.ReporteDespachoJdbcRepository;
+import com.bachoco.persistence.repository.jdbc.ReporteDespachoJdbcRepository;
 import com.bachoco.port.ReporteDespachosPort;
 
 @Repository

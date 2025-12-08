@@ -12,6 +12,7 @@ public class BoletaSalida {
 	private Cliente proveedor;
     private Cliente cliente;
     private String numeroBoleta;
+    private String folio;
     private String fecha;
     private String hora;
     private String producto;

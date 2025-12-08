@@ -20,10 +20,10 @@ import com.bachoco.model.Usuario;
 import com.bachoco.persistence.entity.EmpleadoEntity;
 import com.bachoco.persistence.entity.PerfilEntity;
 import com.bachoco.persistence.entity.UsuarioEntity;
-import com.bachoco.persistence.repository.CatalogJdbcRepository;
 import com.bachoco.persistence.repository.EmpleadoJpaRepository;
 import com.bachoco.persistence.repository.PerfilJpaRepository;
 import com.bachoco.persistence.repository.UsuarioJpaRepository;
+import com.bachoco.persistence.repository.jdbc.CatalogJdbcRepository;
 import com.bachoco.port.PasswordEncoderPort;
 import com.bachoco.port.UsuarioRepositoryPort;
 
@@ -53,11 +53,11 @@ public class UsuarioJpaRepositoryAdapter implements UsuarioRepositoryPort {
 		return toDomain(this.usuarioJpaRepository.save(toEntity(usuario)));
 	}
 
+	@Transactional
 	@Override
 	public Usuario update(Usuario usuario) {
 		Usuario usuarioResponse=new Usuario();
 		try {
-			//var entity=this.usuarioJpaRepository.findByUsuario(usuario.getUsuario());
 			var empleadoEntity=this.empleadoJpaRepository.searchByUsuaurioOrCorreo(usuario.getUsuario());
 			if(empleadoEntity.isPresent() && empleadoEntity.get().getId()!=null) {
 				if(empleadoEntity.get().getUsuario()!=null) {
@@ -65,7 +65,6 @@ public class UsuarioJpaRepositoryAdapter implements UsuarioRepositoryPort {
 					userEntity.setUsuario(usuario.getUsuario());
 					usuarioResponse=toDomain(userEntity);
 				}
-				
 			}
 		}catch (NoSuchElementException e1) {
 			
@@ -89,7 +88,6 @@ public class UsuarioJpaRepositoryAdapter implements UsuarioRepositoryPort {
 	public Optional<Usuario> findByUsuario(String usuario) {
 		try {
 			var auth=this.catalogJdbcRepository.authResponse(usuario);
-			//var entity=this.usuarioJpaRepository.findByUsuario(usuario);
 			if(auth.isPresent()) {
 				return Optional.ofNullable(toDomain(auth.get()));
 			}
@@ -102,10 +100,10 @@ public class UsuarioJpaRepositoryAdapter implements UsuarioRepositoryPort {
 		return Optional.empty();
 	}
 	
+	@Transactional
 	@Override
 	public void updatePassword(String username, String password) {
 		try {
-			//var entity=this.usuarioJpaRepository.findByUsuario(username);
 			Optional<EmpleadoEntity> empleadoEntity=this.empleadoJpaRepository.searchByUsuaurioOrCorreo(username);
 			if(empleadoEntity.isPresent() && (empleadoEntity.get().getUsuario().getPassword()==null || empleadoEntity.get().getUsuario().getPassword().trim().length()==0)) {
 				LocalDateTime ahora = LocalDateTime.now();
@@ -127,10 +125,10 @@ public class UsuarioJpaRepositoryAdapter implements UsuarioRepositoryPort {
 		}	
 	}
 	
+	@Transactional
 	@Override
 	public void addPasswordDefault(String password, String usuario, int empleadoId) {
 		try {
-			//var entity=this.usuarioJpaRepository.findByUsuario(username);
 			Optional<EmpleadoEntity> empleadoEntity=this.empleadoJpaRepository.searchByUsuaurioOrCorreo(usuario);
 			if(empleadoEntity.isPresent() && (empleadoEntity.get().getUsuario()!=null)) {
 				UsuarioEntity userEntity=empleadoEntity.get().getUsuario();
@@ -144,10 +142,10 @@ public class UsuarioJpaRepositoryAdapter implements UsuarioRepositoryPort {
 		}
 	}
 	
+	@Transactional
 	@Override
 	public void updatePasswordExprired(String username, String passwordActual, String nuevoPassword) {
 		try {
-			//var entity=this.usuarioJpaRepository.findByUsuario(username);
 			Optional<EmpleadoEntity> empleadoEntity=this.empleadoJpaRepository.searchByUsuaurioOrCorreo(username);
 			if(empleadoEntity.isPresent() && (empleadoEntity.get().getUsuario().getPassword()!=null)) {
 				if(!this.passwordEncoderPort.matches(passwordActual,empleadoEntity.get().getUsuario().getPassword())) {
@@ -169,7 +167,6 @@ public class UsuarioJpaRepositoryAdapter implements UsuarioRepositoryPort {
 
 	@Override
 	public Optional<Usuario> findByUsername(String username) {
-		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 	
@@ -208,6 +205,7 @@ public class UsuarioJpaRepositoryAdapter implements UsuarioRepositoryPort {
 		usuario.setActivo(auth.getUsuarioTipo());
 		usuario.setUsuario(auth.getUsuario());
 		usuario.setUsuarioTipo(auth.getUsuarioTipo().toString());
+		usuario.setRoles(auth.getRoles());
 		return usuario;
 	}
 

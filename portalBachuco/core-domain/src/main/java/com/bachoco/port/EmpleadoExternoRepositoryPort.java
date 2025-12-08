@@ -13,4 +13,5 @@ public interface EmpleadoExternoRepositoryPort {
 	public List<EmpleadoExternoResponse> findAll();
 	public void update(Integer id,EmpleadoExternoRequest req);
 	void delete(Integer id);
+	public List<Integer> findAllIdEmpleadoBaja();
 }

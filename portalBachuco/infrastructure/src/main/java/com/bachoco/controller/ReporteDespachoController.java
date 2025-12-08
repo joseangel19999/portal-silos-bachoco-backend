@@ -23,9 +23,9 @@ public class ReporteDespachoController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<List<ReporteDespacho>> findAll(@RequestParam Integer bodegaId,
+	public ResponseEntity<List<ReporteDespacho>> findAll(@RequestParam Integer siloId,
 			@RequestParam String fechaI,@RequestParam String fechaF){
-		List<ReporteDespacho> response=this.reporteDespachoUseCase.findAll(bodegaId, fechaI, fechaF);
+		List<ReporteDespacho> response=this.reporteDespachoUseCase.findAll(siloId, fechaI, fechaF);
 		return new ResponseEntity<List<ReporteDespacho>>(response,HttpStatus.OK);
 	}
 	

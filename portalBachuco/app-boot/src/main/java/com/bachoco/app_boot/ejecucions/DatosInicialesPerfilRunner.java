@@ -57,7 +57,7 @@ public class DatosInicialesPerfilRunner implements CommandLineRunner{
 	            this.perfilJpaRepository.saveAll(registrar);
 	        } catch (Exception e) {
 	            // Manejo de la excepción: es crucial loguear el error para saber qué falló
-	            logger.warn("Error al guardar nuevos perfiles: " + e.getMessage());
+	            logger.error("Error al guardar nuevos perfiles: " + e.getMessage());
 	        }
 	    }
 	}

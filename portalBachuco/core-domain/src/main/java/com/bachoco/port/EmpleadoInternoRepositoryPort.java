@@ -15,5 +15,6 @@ public interface EmpleadoInternoRepositoryPort {
 	public List<EmpleadoInternoResponse> findAll();
 	public int save(EmpleadoInternoRequest request) throws Exception;
 	public void delete(Integer id);
+	public List<Integer> findAllIdEmpleadoBaja();
 
 }

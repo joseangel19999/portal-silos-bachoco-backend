@@ -12,6 +12,7 @@ public class Usuario {
 	private Integer activo;
 	private LocalDateTime ultimoModPwd;
 	private Set<Perfil> perfiles;
+	private Set<String> roles;
 	
 	public Usuario() {
 	}
@@ -70,6 +71,14 @@ public class Usuario {
 
 	public void setUltimoModPwd(LocalDateTime ultimoModPwd) {
 		this.ultimoModPwd = ultimoModPwd;
+	}
+
+	public Set<String> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(Set<String> roles) {
+		this.roles = roles;
 	}
 	
 }
