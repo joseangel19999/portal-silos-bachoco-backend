@@ -11,7 +11,6 @@
     <module>core-domain</module>
     <module>core-application</module>
     <module>infrastructure</module>
-    <module>web-api</module>
     <module>app-boot</module>
   </modules>
   
@@ -75,9 +74,15 @@
             </activation>
         </profile>
         <profile>
-            <id>test</id>
+            <id>dev</id>
             <properties>
-                <spring.profiles.active>test</spring.profiles.active>
+                <spring.profiles.active>dev</spring.profiles.active>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <spring.profiles.active>prod</spring.profiles.active>
             </properties>
         </profile>
     </profiles>

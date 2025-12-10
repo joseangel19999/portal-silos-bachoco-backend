@@ -138,10 +138,9 @@ public class PedidoTrasladoJdbcRepositoryAdapter implements PedidoTrasladoJdbcRe
 			plantasDestinoUnicos=StringExtractionUtils.extraerStringsUnicosNoVacios(pedidosSapOriginal, PedidoTrasladoSapResponseDTO::getPlantaDestino);
 			
 			String resultValidacionPlantas=this.validateExistePlantaDestino(plantasDestinoUnicos);
-			if(!resultValidacionPlantas.equals("")) {
+			/*if(!resultValidacionPlantas.equals("")) {
 				throw  new NotFoundPlantaDestinoException(resultValidacionPlantas);
-			}
-
+			}*/
 			//limpieza de lista de pedido tarslado de plantas no existentes en base de datos
 			List<PedidoTrasladoSapResponseDTO> pedTrasladoFiltroPorPlantas=filterPlantasNoexistentesEnBd(pedidosSapOriginal,plantasDestinoUnicos,plantaDestino);
 			
