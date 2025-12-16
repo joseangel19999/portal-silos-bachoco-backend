@@ -33,7 +33,6 @@ public class ProgramArriboRepositoryAdapter implements ProgramArriboRepositoryPo
 	@Override
 	public Double stockSilo(String claveSilo,String material) {
 		Double response=this.programArriboSapRepositoryPor.stockSilo(claveSilo,material, sapProperties.getUrl());
-		//Double response=2000D;
 		if(response!=null) {
 			this.catalogJdbcRepository.resetStockSilo(String.valueOf(response), claveSilo,1);
 			return response;

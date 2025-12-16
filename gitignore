@@ -1,0 +1,16 @@
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+portalBachuco/web-api/target/classes/META-INF/
+./portalBachuco/app-boot/src/main/resources/static/
+portalBachuco/web-api/target/classes/META-INF/
+
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+

@@ -43,6 +43,7 @@ public class ConfirmacionDespachoController {
 	@PostMapping//registra una confirmacion despacho con movimiento 351
 	public ResponseEntity<ConfirmacionDespachoResponse> save(@RequestBody ConfirmacionDespachoRequest req){
 		ConfirmacionDespachoResponse response =this.confirmacionDespachoUseCase.save(req);
+		//ConfirmacionDespachoResponse response= new ConfirmacionDespachoResponse();
 		return new ResponseEntity<ConfirmacionDespachoResponse>(response,HttpStatus.OK);
 	}
 	

@@ -1,4 +1,4 @@
-package com.bachoco.persistence.adapter;
+package com.bachoco.webclient;
 
 import java.io.BufferedReader;
 import java.io.IOException;

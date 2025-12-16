@@ -185,8 +185,88 @@ public class PedidoTrasladoJdbcRepository {
 
 	public List<PedidoTrasladoArriboDTO> obtenerPedidosTrasladoParaArribo(Integer siloId, String plantaDestino,
 			Integer materialId) {
-		String sql = "{call sp_obtener_pedidos_traslados_totales(?,?,?)}";
-		return jdbcTemplate.query(sql, pedTrasladoCantDisponibleRowMapper, siloId, plantaDestino, materialId);
+		//String sql = "{call sp_obtener_pedidos_traslados_totales(?,?,?)}";
+		String sql = """
+						 SELECT
+					        pt.PEDIDO_TRASLADO_ID,
+					        pt.FOLIO_NUM_PED_POSICION,
+					        pt.NUMERO_PED_TRASLADO AS num_pedido,
+					        -- Cálculo final: Cantidad Pedido - Total Peso Neto - Total Arribo
+					        (dpt.CANTIDAD_PEDIDO
+					          - COALESCE(da_sum.total_cantidad_arribo, 0)
+					        ) AS cantidad_pedido
+					    FROM tc_pedido_traslado pt
+					    JOIN tc_detalle_pedido_traslado dpt 
+					        ON pt.PEDIDO_TRASLADO_ID = dpt.TC_PEDIDO_TRASLADO_ID
+					    JOIN tc_pedido_compra pc 
+					        ON pt.TC_PEDIDO_COMPRA_ID = pc.PEDIDO_COMPRA_ID
+					    -- 1. SUMAR PESO NETO PRIMERO (JOIN Derivado)
+					    LEFT JOIN (
+					        SELECT 
+					            TC_PEDIDO_TRASLADO_ID, 
+					            SUM(PESO_NETO) AS total_peso_neto
+					        FROM tc_confirmacion_despacho
+					        GROUP BY TC_PEDIDO_TRASLADO_ID
+					    ) cd_sum ON pt.PEDIDO_TRASLADO_ID = cd_sum.TC_PEDIDO_TRASLADO_ID
+					    -- 2. SUMAR CANTIDAD DE ARRIBO (JOIN Derivado)
+					    LEFT JOIN (
+					        SELECT 
+					            TC_PEDIDO_TRASLADO_ID, 
+					            SUM(CANTIDAD) AS total_cantidad_arribo
+					        FROM tc_detalle_arribo
+					        GROUP BY TC_PEDIDO_TRASLADO_ID
+					    ) da_sum ON pt.PEDIDO_TRASLADO_ID = da_sum.TC_PEDIDO_TRASLADO_ID
+					    WHERE
+							 pc.TC_SILO_ID = ?
+					        AND pt.PLANTA_DESTINO = ?
+					        AND pt.TC_MATERIAL_ID =?
+					        AND (pt.FECHA_PED_TRASLADO IS NULL  OR pt.ESTATUS_CONF_DESPACHO = 'R');
+				     """;
+		
+		String sql2 = """
+				 SELECT
+			        pt.PEDIDO_TRASLADO_ID,
+			        pt.FOLIO_NUM_PED_POSICION,
+			        pt.NUMERO_PED_TRASLADO AS num_pedido,
+			        -- Cálculo final: Cantidad Pedido - Total Peso Neto - Total Arribo
+			        (dpt.CANTIDAD_PEDIDO
+			          - COALESCE(NULLIF(da_sum.total_cantidad_arribo,0),COALESCE(conf_despacho.total_conf_despacho,0))
+			        ) AS cantidad_pedido
+			    FROM tc_pedido_traslado pt
+			    JOIN tc_detalle_pedido_traslado dpt 
+			        ON pt.PEDIDO_TRASLADO_ID = dpt.TC_PEDIDO_TRASLADO_ID
+			    JOIN tc_pedido_compra pc 
+			        ON pt.TC_PEDIDO_COMPRA_ID = pc.PEDIDO_COMPRA_ID
+			    -- 1. SUMAR PESO NETO PRIMERO (JOIN Derivado)
+			    LEFT JOIN (
+			        SELECT 
+			            TC_PEDIDO_TRASLADO_ID, 
+			            SUM(PESO_NETO) AS total_peso_neto
+			        FROM tc_confirmacion_despacho
+			        GROUP BY TC_PEDIDO_TRASLADO_ID
+			    ) cd_sum ON pt.PEDIDO_TRASLADO_ID = cd_sum.TC_PEDIDO_TRASLADO_ID
+			    -- 2. SUMAR CANTIDAD DE ARRIBO (JOIN Derivado)
+			    LEFT JOIN (
+			        SELECT 
+			            TC_PEDIDO_TRASLADO_ID, 
+			            SUM(CANTIDAD) AS total_cantidad_arribo
+			        FROM tc_detalle_arribo
+			        GROUP BY TC_PEDIDO_TRASLADO_ID
+			    ) da_sum ON pt.PEDIDO_TRASLADO_ID = da_sum.TC_PEDIDO_TRASLADO_ID
+			    LEFT JOIN (
+			        SELECT 
+			            TC_PEDIDO_TRASLADO_ID, 
+			            SUM(PESO_NETO) AS total_conf_despacho
+			        FROM tc_confirmacion_despacho
+			        GROUP BY TC_PEDIDO_TRASLADO_ID
+			    ) conf_despacho ON pt.PEDIDO_TRASLADO_ID = conf_despacho.TC_PEDIDO_TRASLADO_ID
+			    WHERE
+					 pc.TC_SILO_ID = ?
+			        AND pt.PLANTA_DESTINO = ?
+			        AND pt.TC_MATERIAL_ID =?
+			        AND (pt.FECHA_PED_TRASLADO IS NULL  OR pt.ESTATUS_CONF_DESPACHO = 'R');
+		     """;
+		return jdbcTemplate.query(sql2, pedTrasladoCantDisponibleRowMapper, siloId, plantaDestino, materialId);
 	}
 
 	public List<PedidoTrasladoArriboDTO> findByFilterProgramArribo(Integer siloId, String plantaDestino,

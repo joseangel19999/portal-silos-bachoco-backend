@@ -46,6 +46,7 @@ public class ProgramArriboController {
 		return new ResponseEntity<List<PedidoTrasladoArriboDTO>>(response,HttpStatus.OK);
 	}
 	
+	//metodo que extrae el total de programado en arribos de acuerdo a los parametros y validar si se excede en peto neto en confirmacion despacho
 	@GetMapping("/findTotal-ProgramArriboByNumPedTraslado")
 	public ResponseEntity<Float> findPesoNetoByNumPedTraslado(
 			@RequestParam String numPedidoTraslados, @RequestParam String claveSilo,@RequestParam String claveMaterial,@RequestParam String clavePlanta,

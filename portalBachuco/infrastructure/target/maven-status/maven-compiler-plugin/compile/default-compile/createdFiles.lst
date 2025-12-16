@@ -79,7 +79,6 @@ com\bachoco\dto\CompraAsociadoKey.class
 com\bachoco\persistence\entity\PermisoEntity.class
 com\bachoco\controller\EmpleadoController.class
 com\bachoco\mapper\SiloMapper.class
-com\bachoco\persistence\adapter\ConfirmacionDespachoSapClientAdapter.class
 com\bachoco\controller\ProgramArriboController.class
 com\bachoco\utils\UtileriaComparators.class
 com\bachoco\controller\PedidoTrasladoController.class
@@ -120,6 +119,7 @@ com\bachoco\security\filter\JwtAuthenticationFilter.class
 com\bachoco\persistence\entity\MaterialEntity$MaterialEntityBuilder.class
 com\bachoco\dto\PlantaResponse$PlantaResponseBuilder.class
 com\bachoco\persistence\adapter\AuthenticationAdapter.class
+com\bachoco\webclient\ConfirmacionDespachoSapClientAdapter.class
 com\bachoco\dto\sap\confDespacho\SapResponse.class
 com\bachoco\utils\UtileriaNumeros.class
 com\bachoco\persistence\entity\PuestoEntity.class

@@ -18,6 +18,7 @@ import com.bachoco.persistence.repository.jdbc.PedidoTrasladoJdbcRepository;
 import com.bachoco.port.ConfirmacionDespachoJdbcRepository;
 import com.bachoco.port.ProgramArriboRepositoryPort;
 import com.bachoco.utils.ConfirmacionDespachoUtil;
+import com.bachoco.webclient.ConfirmacionDespachoSapClientAdapter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,8 +90,8 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 					if (result.get(ConfirmacionDespachoUtil.VALUE_STATUS).equals(ConfirmacionDespachoUtil.VALUE_ZERO_STR)) {
 						response.setId(result.get(KEY_ID));
 						response.setMensaje(result.get(KEY_FOLIO));
-						this.catalogJdbcRepository.restaCantidadStockSilo(pesoNeto,req.getClaveSilo(),-1);
-						pedidoTrasladoJdbcRepository.restaCantidadPedTraslado(pesoNeto, req.getNumPedidoTraslado(), 1);
+						//this.catalogJdbcRepository.restaCantidadStockSilo(pesoNeto,req.getClaveSilo(),-1);
+						//pedidoTrasladoJdbcRepository.restaCantidadPedTraslado(pesoNeto, req.getNumPedidoTraslado(), 1);
 					} else {
 						response.setCode(ESTATUS_CODE_FAIL_SAVE_BD);
 						response.setId(result.get(KEY_ID));
@@ -179,11 +180,11 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 						logger.info("MATERIAL: "+req.getClaveMaterial());
 						logger.info("===============================================");
 						if(!isSuma) {
-							pedidoTrasladoJdbcRepository.sumaCantidadPedTraslado(differencia, req.getNumPedidoTraslado(), 1);
-							this.catalogJdbcRepository.restaCantidadStockSilo(differencia,req.getClaveSilo(),-1);
+							//pedidoTrasladoJdbcRepository.sumaCantidadPedTraslado(differencia, req.getNumPedidoTraslado(), 1);
+							//this.catalogJdbcRepository.restaCantidadStockSilo(differencia,req.getClaveSilo(),-1);
 						}else {
-							pedidoTrasladoJdbcRepository.restaCantidadPedTraslado(differencia, req.getNumPedidoTraslado(), 1);
-							this.catalogJdbcRepository.sumaCantidadStockSilo(differencia,req.getClaveSilo(),-1);
+							//pedidoTrasladoJdbcRepository.restaCantidadPedTraslado(differencia, req.getNumPedidoTraslado(), 1);
+							//this.catalogJdbcRepository.sumaCantidadStockSilo(differencia,req.getClaveSilo(),-1);
 						}
 						
 					}else {
@@ -300,7 +301,7 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 					//despues que hubo cancelacion exitosa de sap, se tiene que eliminar el registro en la base de datos y se tiene que sumar nuevamente el stock
 					int eliminado=this.confDespachoJdbcRepository.deleteById(req.getIdConfDespacho());
 					if (eliminado!=0) {
-						pedidoTrasladoJdbcRepository.sumaCantidadPedTraslado(pesoNetoOld, req.getNumPedidoTraslado(), 1);
+						//pedidoTrasladoJdbcRepository.sumaCantidadPedTraslado(pesoNetoOld, req.getNumPedidoTraslado(), 1);
 					}else {
 						response.setCode(ESTATUS_CODE_FAIL_SAVE_BD);
 						response.setMensaje("Hubo un error al eliminar la confirmacion despacho");
