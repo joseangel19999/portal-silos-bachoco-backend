@@ -22,7 +22,9 @@ public class ProgramArriboUseCase {
 	}
 	
 	public Float findPesoNetoByNumPedTraslado(List<String> numPedidoTraslados, String claveSilo,
-			String claveMaterial, String clavePlanta, String fechaInicio, String fechaFinF){
-		return this.programArriboRepositoryPort.findPesoNetoByNumPedTraslado(numPedidoTraslados, claveSilo,claveMaterial,clavePlanta, fechaInicio,fechaFinF);
+			String claveMaterial, String clavePlanta, String fechaInicio, String fechaFinF,
+			Integer idConfDespacho){
+		return this.programArriboRepositoryPort.findPesoNetoByNumPedTraslado(numPedidoTraslados, claveSilo,claveMaterial,clavePlanta, fechaInicio,fechaFinF,
+				idConfDespacho);
 	}
 }

@@ -49,8 +49,8 @@ public class ProgramArriboRepositoryAdapter implements ProgramArriboRepositoryPo
 
 	@Override
 	public Float findPesoNetoByNumPedTraslado(List<String> numPedidoTraslados, String claveSilo,
-			String claveMaterial, String clavePlanta, String fechaInicio, String fechaFin) {
-		return this.catalogJdbcRepository.totalProgramArriboByPedTraslado(numPedidoTraslados, claveSilo, claveMaterial, clavePlanta, fechaInicio, fechaFin);
+			String claveMaterial, String clavePlanta, String fechaInicio, String fechaFin,Integer idConfDespacho) {
+		return this.catalogJdbcRepository.totalProgramArriboByPedTraslado(numPedidoTraslados, claveSilo, claveMaterial, clavePlanta, fechaInicio, fechaFin,idConfDespacho);
 	}
 
 }

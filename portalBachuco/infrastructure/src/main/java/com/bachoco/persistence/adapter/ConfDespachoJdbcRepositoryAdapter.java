@@ -65,7 +65,7 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 	
 	private Float pesoTotalPedidoTraslado(List<String> numPedidoTraslados, String claveSilo,
 			String claveMaterial, String clavePlanta, String fechaInicio, String fechaFin) {
-		return this.programArriboRepositoryPort.findPesoNetoByNumPedTraslado(numPedidoTraslados, claveSilo, claveMaterial, clavePlanta, fechaInicio, fechaFin);
+		return this.programArriboRepositoryPort.findPesoNetoByNumPedTraslado(numPedidoTraslados, claveSilo, claveMaterial, clavePlanta, fechaInicio, fechaFin,0);
 	}
 	
 	//envia siempre 351 a sap y registra la confirmacion despacho en base de datos
@@ -74,8 +74,8 @@ public class ConfDespachoJdbcRepositoryAdapter implements ConfirmacionDespachoJd
 		Float pesoNeto = req.getPesoBruto() - req.getPesoTara();
 		ConfirmacionDespachoResponse response = new ConfirmacionDespachoResponse();
 		try {
-			Float pesoTotalProgramadoArribo=this.pesoTotalPedidoTraslado(List.of(req.getNumPedidoTraslado()),req.getClaveSilo(),
-					req.getClaveMaterial(),req.getClaveDestino(),EMPTY, EMPTY);
+			/*Float pesoTotalProgramadoArribo=this.pesoTotalPedidoTraslado(List.of(req.getNumPedidoTraslado()),req.getClaveSilo(),
+					req.getClaveMaterial(),req.getClaveDestino(),EMPTY, EMPTY);*/
 			SapResponse sapResponse=sapResponse(req,pesoNeto);
 			if(sapResponse!=null) {
 				response.setCode(sapResponse.getT_RETURN().get(0).getType());

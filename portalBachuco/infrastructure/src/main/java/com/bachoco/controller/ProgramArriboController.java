@@ -50,8 +50,9 @@ public class ProgramArriboController {
 	@GetMapping("/findTotal-ProgramArriboByNumPedTraslado")
 	public ResponseEntity<Float> findPesoNetoByNumPedTraslado(
 			@RequestParam String numPedidoTraslados, @RequestParam String claveSilo,@RequestParam String claveMaterial,@RequestParam String clavePlanta,
-			@RequestParam String fechaInicio,@RequestParam String fechaFin){
-		Float response=this.programArriboUseCase.findPesoNetoByNumPedTraslado(List.of(numPedidoTraslados.split(",")), claveSilo,claveMaterial,clavePlanta, fechaInicio,fechaFin);
+			@RequestParam String fechaInicio,@RequestParam String fechaFin,@RequestParam Integer idConfDespacho){
+		Float response=this.programArriboUseCase.findPesoNetoByNumPedTraslado(List.of(numPedidoTraslados.split(",")), claveSilo,claveMaterial,clavePlanta, fechaInicio,fechaFin,
+				idConfDespacho);
 		return new ResponseEntity<Float>(response,HttpStatus.OK);
 	}
 	

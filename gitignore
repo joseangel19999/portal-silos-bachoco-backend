@@ -1,9 +1,10 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
+portalBachuco/core-domain/target/
 portalBachuco/web-api/target/classes/META-INF/
 ./portalBachuco/app-boot/src/main/resources/static/
 portalBachuco/web-api/target/classes/META-INF/
-
+portalBachuco/infrastructure/target/
 
 # IDEs and editors
 .idea/

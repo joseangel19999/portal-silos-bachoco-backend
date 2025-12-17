@@ -244,111 +244,120 @@ public class CatalogJdbcRepository {
 
 	//calcula el total de programado en arribos restandole a lo que ya se ha confirmado en despacho, para saber cuanto queda programado arribo y evitar que haga mas confirmaciones despachos
 	public Float totalProgramArriboByPedTraslado(List<String> numPedidoTraslados, String claveSilo,
-			String claveMaterial, String clavePlanta, String fechaInicio, String fechaFin) {
-		String sql = """
-				SELECT SUM(da.CANTIDAD-COALESCE(cf.PESO_NETO,0)) as total
-				FROM tc_arribo a
-				JOIN tc_detalle_arribo da ON a.ARRIBO_ID = da.TC_ARRIBO_ID
-				JOIN tc_pedido_traslado pt ON da.TC_PEDIDO_TRASLADO_ID = pt.PEDIDO_TRASLADO_ID
-				JOIN tc_silo s ON a.SILO_ID = s.SILO_ID
-				JOIN tc_material m ON a.MATERIAL_ID = m.MATERIAL_ID
-				JOIN tc_planta p ON a.TC_PLANTA_ID = p.PLANTA_ID
-				LEFT JOIN tc_confirmacion_despacho cf ON cf.TC_PEDIDO_TRASLADO_ID=pt.PEDIDO_TRASLADO_ID
-				WHERE 1=1
-				  AND  m.NUMERO_MATERIAL = :claveMaterial
-				  AND pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
-				  AND (:clavePlanta IS NULL OR p.NOMBRE = :clavePlanta OR p.PLANTA_CLAVE = :clavePlanta)
-				  AND (:claveSilo IS NULL OR s.SILO_NOMBRE = :claveSilo OR s.SILO_CLAVE = :claveSilo)
-				  AND (:fechaInicio IS NULL OR da.FECHA_PROGRAMADA >= STR_TO_DATE(:fechaInicio, '%Y-%m-%d'))
-				  AND (:fechaFin IS NULL OR da.FECHA_PROGRAMADA <= STR_TO_DATE(:fechaFin, '%Y-%m-%d'))
-				  """;
-		
-		String sql2 = """
-				SELECT 
-				    total_da - total_cf AS peso_neto_total
-				FROM (
-				    -- Suma de cantidad de detalle arribo (única por pedido)
-				    SELECT 
-				        COALESCE(SUM(da.CANTIDAD), 0) AS total_da
-				    FROM tc_detalle_arribo da
-				    INNER JOIN tc_pedido_traslado pt ON da.TC_PEDIDO_TRASLADO_ID = pt.PEDIDO_TRASLADO_ID
-				    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
-				      AND EXISTS (
-				          SELECT 1 FROM tc_arribo a
-				          INNER JOIN tc_material m ON a.MATERIAL_ID = m.MATERIAL_ID
-				          INNER JOIN tc_silo s ON a.SILO_ID = s.SILO_ID
-				          INNER JOIN tc_planta p ON a.TC_PLANTA_ID = p.PLANTA_ID
-				          WHERE a.ARRIBO_ID = da.TC_ARRIBO_ID
-				            AND m.NUMERO_MATERIAL = :claveMaterial
-				            AND (:clavePlanta IS NULL OR p.NOMBRE = :clavePlanta OR p.PLANTA_CLAVE = :clavePlanta)
-				            AND (:claveSilo IS NULL OR s.SILO_NOMBRE = :claveSilo OR s.SILO_CLAVE = :claveSilo)
-				           	AND (:fechaInicio IS NULL OR da.FECHA_PROGRAMADA >= STR_TO_DATE(:fechaInicio, '%Y-%m-%d'))
-				  			AND (:fechaFin IS NULL OR da.FECHA_PROGRAMADA <= STR_TO_DATE(:fechaFin, '%Y-%m-%d'))
-				      )
-				) AS detalle_arribo,
-				(
-				    -- Suma de peso neto de confirmación despacho (única por pedido)
-				    SELECT 
-				        COALESCE(SUM(cf.PESO_NETO), 0) AS total_cf
-				    FROM tc_confirmacion_despacho cf
-				    INNER JOIN tc_pedido_traslado pt ON cf.TC_PEDIDO_TRASLADO_ID = pt.PEDIDO_TRASLADO_ID
-				    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
-				) AS confirmacion_despacho
-				  """;
-
-		
-		String sql3 = """
-				SELECT
-				     COALESCE(NULLIF(total_da,0),ped_traslado.total_ped_traslado)- total_cf AS peso_neto_total
-				FROM (
-				    SELECT 
-				        COALESCE(SUM(da.CANTIDAD), 0) AS total_da
-				    FROM tc_detalle_arribo da
-				    INNER JOIN tc_pedido_traslado pt ON da.TC_PEDIDO_TRASLADO_ID = pt.PEDIDO_TRASLADO_ID
-				    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
-				      AND EXISTS (
-				          SELECT 1 FROM tc_arribo a
-				          INNER JOIN tc_material m ON a.MATERIAL_ID = m.MATERIAL_ID
-				          INNER JOIN tc_silo s ON a.SILO_ID = s.SILO_ID
-				          INNER JOIN tc_planta p ON a.TC_PLANTA_ID = p.PLANTA_ID
-				          WHERE a.ARRIBO_ID = da.TC_ARRIBO_ID
-				            AND m.NUMERO_MATERIAL = :claveMaterial
-				            AND (:clavePlanta IS NULL OR p.NOMBRE = :clavePlanta OR p.PLANTA_CLAVE = :clavePlanta)
-				            AND (:claveSilo IS NULL OR s.SILO_NOMBRE = :claveSilo OR s.SILO_CLAVE = :claveSilo)
-				           	AND (:fechaInicio IS NULL OR da.FECHA_PROGRAMADA >= STR_TO_DATE(:fechaInicio, '%Y-%m-%d'))
-				  			AND (:fechaFin IS NULL OR da.FECHA_PROGRAMADA <= STR_TO_DATE(:fechaFin, '%Y-%m-%d'))
-				      )
-				) AS detalle_arribo,
-				(
-				    SELECT 
-				        COALESCE(SUM(cf.PESO_NETO), 0) AS total_cf
-				    FROM tc_confirmacion_despacho cf
-				    INNER JOIN tc_pedido_traslado pt ON cf.TC_PEDIDO_TRASLADO_ID = pt.PEDIDO_TRASLADO_ID
-				    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
-				) AS confirmacion_despacho,
-				(
-				    SELECT 
-				        SUM(dtp.CANTIDAD_PEDIDO) AS total_ped_traslado
-				    FROM tc_pedido_traslado pt
-				    JOIN tc_detalle_pedido_traslado dtp ON pt.PEDIDO_TRASLADO_ID=dtp.TC_PEDIDO_TRASLADO_ID
-					INNER JOIN tc_material m ON pt.TC_MATERIAL_ID = m.MATERIAL_ID
-					INNER JOIN tc_silo s ON pt.TC_SILO_ID = s.SILO_ID
-				    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
-				     AND m.NUMERO_MATERIAL = :claveMaterial
-					 AND (:clavePlanta IS NULL OR pt.PLANTA_DESTINO = :clavePlanta OR pt.PLANTA_DESTINO  = :clavePlanta)
-				     AND (:claveSilo IS NULL OR s.SILO_NOMBRE =:claveSilo OR s.SILO_CLAVE =:claveSilo)
-				     LIMIT 1
-				) AS ped_traslado
-				  """;
+			String claveMaterial, String clavePlanta, String fechaInicio, String fechaFin,Integer idConfDespacho) {
+		String sql3="";
 		Map<String, Object> params = new HashMap<>();
-		params.put("claveMaterial", claveMaterial);
-		params.put("numPedidoTraslados", numPedidoTraslados);
-		params.put("clavePlanta", clavePlanta);
-		params.put("claveSilo", claveSilo);
-		params.put("fechaInicio", fechaInicio);
-		params.put("fechaFin", fechaFin);
+		if(!idConfDespacho.equals(0)) {
+			params.put("claveMaterial", claveMaterial);
+			params.put("numPedidoTraslados", numPedidoTraslados);
+			params.put("clavePlanta", clavePlanta);
+			params.put("claveSilo", claveSilo);
+			params.put("fechaInicio", fechaInicio);
+			params.put("fechaFin", fechaFin);
+			params.put("idConfDespacho", idConfDespacho);
+			sql3 = """
+					SELECT
+					   (COALESCE(NULLIF(total_da,0),ped_traslado.total_ped_traslado) - total_cf) + total_cf_act AS peso_neto_total
+					FROM (
+					    SELECT 
+					        COALESCE(SUM(da.CANTIDAD), 0) AS total_da
+					    FROM tc_detalle_arribo da
+					    INNER JOIN tc_pedido_traslado pt ON da.TC_PEDIDO_TRASLADO_ID = pt.PEDIDO_TRASLADO_ID
+					    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
+					      AND EXISTS (
+					          SELECT 1 FROM tc_arribo a
+					          INNER JOIN tc_material m ON a.MATERIAL_ID = m.MATERIAL_ID
+					          INNER JOIN tc_silo s ON pt.TC_SILO_ID = s.SILO_ID
+					          INNER JOIN tc_planta p ON a.TC_PLANTA_ID = p.PLANTA_ID
+					          WHERE a.ARRIBO_ID = da.TC_ARRIBO_ID
+					            AND m.NUMERO_MATERIAL = :claveMaterial
+					            AND (a.SILO_ID=:claveSilo OR (:claveSilo IS NULL OR s.SILO_NOMBRE = :claveSilo OR s.SILO_CLAVE = :claveSilo))
+					            AND (:clavePlanta IS NULL OR p.NOMBRE = :clavePlanta OR p.PLANTA_CLAVE = :clavePlanta)
+					           	AND (:fechaInicio IS NULL OR da.FECHA_PROGRAMADA >= STR_TO_DATE(:fechaInicio, '%Y-%m-%d'))
+					  			AND (:fechaFin IS NULL OR da.FECHA_PROGRAMADA <= STR_TO_DATE(:fechaFin, '%Y-%m-%d'))
+					      )
+					) AS detalle_arribo,
+					(
+					    SELECT 
+					        COALESCE(SUM(cf.PESO_NETO), 0) AS total_cf
+					    FROM tc_confirmacion_despacho cf
+					    INNER JOIN tc_pedido_traslado pt ON cf.TC_PEDIDO_TRASLADO_ID = pt.PEDIDO_TRASLADO_ID
+					    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
+					) AS confirmacion_despacho,
+					(                    
+						SELECT 
+					        cf.PESO_NETO AS total_cf_act
+					    FROM tc_confirmacion_despacho cf WHERE cf.CONFIRMACION_DESPACHO_ID=:idConfDespacho
+					) AS confirmacion_despacho_act,
+					(
+					    SELECT 
+					        SUM(dtp.CANTIDAD_PEDIDO) AS total_ped_traslado
+					    FROM tc_pedido_traslado pt
+					    JOIN tc_detalle_pedido_traslado dtp ON pt.PEDIDO_TRASLADO_ID=dtp.TC_PEDIDO_TRASLADO_ID
+						INNER JOIN tc_material m ON pt.TC_MATERIAL_ID = m.MATERIAL_ID
+						INNER JOIN tc_silo s ON pt.TC_SILO_ID = s.SILO_ID
+					    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
+					     AND m.NUMERO_MATERIAL = :claveMaterial
+					     AND (pt.TC_SILO_ID =:claveSilo OR (:claveSilo IS NULL OR s.SILO_NOMBRE = :claveSilo OR s.SILO_CLAVE = :claveSilo))
+					     AND (:clavePlanta IS NULL OR pt.PLANTA_DESTINO = :clavePlanta OR pt.PLANTA_DESTINO  = :clavePlanta)
+					     LIMIT 1
+					) AS ped_traslado
+					""";
+		}else {
+			params.put("claveMaterial", claveMaterial);
+			params.put("numPedidoTraslados", numPedidoTraslados);
+			params.put("clavePlanta", clavePlanta);
+			params.put("claveSilo", claveSilo);
+			params.put("fechaInicio", fechaInicio);
+			params.put("fechaFin", fechaFin);
+			
+			sql3 = """
+					SELECT
+					     COALESCE(NULLIF(total_da,0),ped_traslado.total_ped_traslado)- total_cf AS peso_neto_total
+					FROM (
+					    SELECT 
+					        COALESCE(SUM(da.CANTIDAD), 0) AS total_da
+					    FROM tc_detalle_arribo da
+					    INNER JOIN tc_pedido_traslado pt ON da.TC_PEDIDO_TRASLADO_ID = pt.PEDIDO_TRASLADO_ID
+					    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
+					      AND EXISTS (
+					          SELECT 1 FROM tc_arribo a
+					          INNER JOIN tc_material m ON a.MATERIAL_ID = m.MATERIAL_ID
+					          INNER JOIN tc_silo s ON a.SILO_ID = s.SILO_ID
+					          INNER JOIN tc_planta p ON a.TC_PLANTA_ID = p.PLANTA_ID
+					          WHERE a.ARRIBO_ID = da.TC_ARRIBO_ID
+					            AND m.NUMERO_MATERIAL = :claveMaterial
+					            AND (:clavePlanta IS NULL OR p.NOMBRE = :clavePlanta OR p.PLANTA_CLAVE = :clavePlanta)
+					            AND (:claveSilo IS NULL OR s.SILO_NOMBRE = :claveSilo OR s.SILO_CLAVE = :claveSilo)
+					           	AND (:fechaInicio IS NULL OR da.FECHA_PROGRAMADA >= STR_TO_DATE(:fechaInicio, '%Y-%m-%d'))
+					  			AND (:fechaFin IS NULL OR da.FECHA_PROGRAMADA <= STR_TO_DATE(:fechaFin, '%Y-%m-%d'))
+					      )
+					) AS detalle_arribo,
+					(
+					    SELECT 
+					        COALESCE(SUM(cf.PESO_NETO), 0) AS total_cf
+					    FROM tc_confirmacion_despacho cf
+					    INNER JOIN tc_pedido_traslado pt ON cf.TC_PEDIDO_TRASLADO_ID = pt.PEDIDO_TRASLADO_ID
+					    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
+					) AS confirmacion_despacho,
+					(
+					    SELECT 
+					        SUM(dtp.CANTIDAD_PEDIDO) AS total_ped_traslado
+					    FROM tc_pedido_traslado pt
+					    JOIN tc_detalle_pedido_traslado dtp ON pt.PEDIDO_TRASLADO_ID=dtp.TC_PEDIDO_TRASLADO_ID
+						INNER JOIN tc_material m ON pt.TC_MATERIAL_ID = m.MATERIAL_ID
+						INNER JOIN tc_silo s ON pt.TC_SILO_ID = s.SILO_ID
+					    WHERE pt.NUMERO_PED_TRASLADO IN (:numPedidoTraslados)
+					     AND m.NUMERO_MATERIAL = :claveMaterial
+						 AND (:clavePlanta IS NULL OR pt.PLANTA_DESTINO = :clavePlanta OR pt.PLANTA_DESTINO  = :clavePlanta)
+					     AND (:claveSilo IS NULL OR s.SILO_NOMBRE =:claveSilo OR s.SILO_CLAVE =:claveSilo)
+					     LIMIT 1
+					) AS ped_traslado
+					  """;
+		}
 		try {
-			return namedParameterJdbcTemplate.queryForObject(sql3, params, Float.class);
+			Float resultado=namedParameterJdbcTemplate.queryForObject(sql3, params, Float.class);
+			return resultado;
 		} catch (EmptyResultDataAccessException e) {
 			return 0.0F;
 		}
